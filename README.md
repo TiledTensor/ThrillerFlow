@@ -1,2 +1,2 @@
-# TrillerFlow
-TrillerFlow is a Dataflow Analysis Framework written in Rust.
+# ThrillerFlow
+ThrillerFlow is a Dataflow Analysis Framework written in Rust.
