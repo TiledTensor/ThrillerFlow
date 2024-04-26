@@ -10,7 +10,7 @@ mod task;
 
 pub use access::AccessMap;
 pub use buffer::Buffer;
-pub use dataflow::{ThrillerGraph, ThrillerNode};
+pub use dataflow::{ThrillerEdge, ThrillerGraph, ThrillerNode};
 
 /// Initialize the ThrillerFlow framework.
 pub fn initialize() {
