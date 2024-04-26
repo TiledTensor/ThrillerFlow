@@ -1,12 +1,30 @@
 use std::rc::Rc;
 
-use crate::dataflow::graph::ThrillerGraph;
+use crate::dataflow::{ThrillerEdge, ThrillerGraph};
 use crate::task::Task;
 
-/// A Thriller Dataflow Node that represents either a block of subgraph or an operation.
-pub enum ThrillerNode {
-    /// Represents a block of subgraph.
+/// `ThrillerNodeInnrer` is an enum to represent either an operation or a block.
+#[allow(dead_code)]
+pub enum ThrillerNodeInner {
+    Op(Box<dyn Task>),
     Block(Rc<ThrillerGraph>),
-    /// Represents an operation.
-    Op(Rc<Box<dyn Task>>),
+}
+
+/// A Thriller Dataflow Node that represents either a block of subgraph or an operation.
+#[allow(dead_code)]
+pub struct ThrillerNode {
+    inner: Box<ThrillerNodeInner>,
+    in_edges: Vec<Rc<ThrillerEdge>>,
+    out_edges: Vec<Rc<ThrillerEdge>>,
+}
+
+impl ThrillerNode {
+    /// Create a new `ThrillerNode` with the given inner type.
+    pub fn new(inner: ThrillerNodeInner) -> Self {
+        ThrillerNode {
+            inner: Box::new(inner),
+            in_edges: Vec::new(),
+            out_edges: Vec::new(),
+        }
+    }
 }

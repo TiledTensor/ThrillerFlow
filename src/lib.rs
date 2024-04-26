@@ -2,11 +2,13 @@
 
 #![deny(warnings)]
 #![deny(missing_docs)]
+mod access;
 mod buffer;
 mod dataflow;
 mod id;
 mod task;
 
+pub use access::AccessMap;
 pub use buffer::Buffer;
 pub use dataflow::{ThrillerGraph, ThrillerNode};
 
