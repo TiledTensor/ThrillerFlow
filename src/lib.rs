@@ -10,7 +10,7 @@ mod task;
 
 pub use access::AccessMap;
 pub use buffer::Buffer;
-pub use dataflow::{ThrillerEdge, ThrillerGraph, ThrillerNode};
+pub use dataflow::{BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode};
 
 use id::ID_COUNTER;
 
