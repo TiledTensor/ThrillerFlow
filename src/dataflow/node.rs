@@ -16,6 +16,10 @@ pub struct ThrillerNode {
     inner: Box<ThrillerNodeInner>,
     in_edges: Vec<Rc<ThrillerEdge>>,
     out_edges: Vec<Rc<ThrillerEdge>>,
+    predecessors: Vec<Rc<ThrillerNode>>,
+    successors: Vec<Rc<ThrillerNode>>,
+    id: usize,
+    in_degrees: usize,
 }
 
 impl ThrillerNode {
@@ -25,6 +29,22 @@ impl ThrillerNode {
             inner: Box::new(inner),
             in_edges: Vec::new(),
             out_edges: Vec::new(),
+            predecessors: Vec::new(),
+            successors: Vec::new(),
+            id: unsafe { crate::id::ID_COUNTER.get_mut().unwrap().next() },
+            in_degrees: 0,
         }
+    }
+
+    pub(crate) fn get_id(&self) -> usize {
+        self.id
+    }
+
+    pub(crate) fn get_in_degrees(&self) -> usize {
+        self.in_degrees
+    }
+
+    pub(crate) fn get_successors(&self) -> &Vec<Rc<ThrillerNode>> {
+        &self.successors
     }
 }

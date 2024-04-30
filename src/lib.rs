@@ -12,6 +12,18 @@ pub use access::AccessMap;
 pub use buffer::Buffer;
 pub use dataflow::{ThrillerEdge, ThrillerGraph, ThrillerNode};
 
+/// GPU Memory Level.
+#[derive(Default)]
+pub enum MemoryLevel {
+    /// Register File
+    #[default]
+    Register,
+    /// Shared Memory
+    Shared,
+    /// Global Memory
+    Global,
+}
+
 /// Initialize the ThrillerFlow framework.
 pub fn initialize() {
     let id_counter = id::IdCounter::new();
