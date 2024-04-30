@@ -12,6 +12,8 @@ pub use access::AccessMap;
 pub use buffer::Buffer;
 pub use dataflow::{ThrillerEdge, ThrillerGraph, ThrillerNode};
 
+use id::ID_COUNTER;
+
 /// GPU Memory Level.
 #[derive(Default)]
 pub enum MemoryLevel {
@@ -30,4 +32,9 @@ pub fn initialize() {
     unsafe {
         id::ID_COUNTER.get_or_init(|| id_counter);
     }
+}
+
+/// Return the next unique ID.
+pub fn next_id() -> usize {
+    unsafe { ID_COUNTER.get_mut().unwrap().next() }
 }
