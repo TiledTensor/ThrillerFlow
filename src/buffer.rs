@@ -1,4 +1,4 @@
-use crate::id::ID_COUNTER;
+use crate::next_id;
 
 /// A Buffer data structure.
 #[allow(dead_code)]
@@ -10,7 +10,7 @@ pub struct Buffer {
 impl Buffer {
     /// Create a new Buffer with the given name.
     pub fn new(name: &str) -> Self {
-        let id = unsafe { ID_COUNTER.get_mut().unwrap().next() };
+        let id = next_id();
         Buffer {
             name: name.to_string(),
             id,

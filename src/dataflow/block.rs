@@ -1,9 +1,8 @@
 use std::rc::Rc;
 use std::vec::Vec;
 
-use crate::dataflow::ThrillerGraph;
+use crate::dataflow::{AttachedEdge, ThrillerGraph};
 use crate::task::Task;
-use crate::Buffer;
 use crate::MemoryLevel;
 
 /// A map relation from inputs into outputs.
@@ -16,14 +15,31 @@ pub enum BlockType {
 
 /// A Thriller Dataflow Block representing a memory level subgraph.
 pub struct ThrillerBlock {
-    inputs: Vec<Rc<Buffer>>,
-    outputs: Vec<Rc<Buffer>>,
+    inputs: Vec<Rc<AttachedEdge>>,
+    outputs: Vec<Rc<AttachedEdge>>,
     mem_level: MemoryLevel,
+    #[allow(dead_code)]
     subgraph: Rc<ThrillerGraph>,
     block_type: BlockType,
 }
 
 impl ThrillerBlock {
+    /// Create a new ThrillerBlock with the given inputs, outputs, memory level, subgraph, and block type.
+    pub fn new(
+        inputs: Vec<Rc<AttachedEdge>>,
+        outputs: Vec<Rc<AttachedEdge>>,
+        mem_level: MemoryLevel,
+        subgraph: Rc<ThrillerGraph>,
+        block_type: BlockType,
+    ) -> Self {
+        ThrillerBlock {
+            inputs,
+            outputs,
+            mem_level,
+            subgraph,
+            block_type,
+        }
+    }
     /// Generate load code for the block inputs.
     pub(crate) fn gen_load(&self) -> String {
         let mut code = String::new();
@@ -32,13 +48,21 @@ impl ThrillerBlock {
         match self.mem_level {
             MemoryLevel::Register => {
                 for input in &self.inputs {
-                    code.push_str(&format!("copy_2d_tile_s2r({});\n", input.get_name()));
+                    code.push_str(&format!(
+                        "copy_2d_tile_s2r({}, {});\n",
+                        input.get_src_name(),
+                        input.get_dst_name()
+                    ));
                 }
             }
 
             MemoryLevel::Shared => {
                 for input in &self.inputs {
-                    code.push_str(&format!("copy_2d_tile_g2s({});\n", input.get_name()));
+                    code.push_str(&format!(
+                        "copy_2d_tile_g2s({}, {});\n",
+                        input.get_src_name(),
+                        input.get_dst_name()
+                    ));
                 }
             }
 
@@ -56,13 +80,21 @@ impl ThrillerBlock {
             BlockType::Map => match self.mem_level {
                 MemoryLevel::Register => {
                     for output in &self.outputs {
-                        code.push_str(&format!("copy_2d_tile_r2s({});\n", output.get_name()));
+                        code.push_str(&format!(
+                            "copy_2d_tile_r2s({}, {});\n",
+                            output.get_src_name(),
+                            output.get_dst_name()
+                        ));
                     }
                 }
 
                 MemoryLevel::Shared => {
                     for output in &self.outputs {
-                        code.push_str(&format!("copy_2d_tile_s2g({});\n", output.get_name()));
+                        code.push_str(&format!(
+                            "copy_2d_tile_s2g({}, {});\n",
+                            output.get_src_name(),
+                            output.get_dst_name()
+                        ));
                     }
                 }
 
@@ -74,22 +106,23 @@ impl ThrillerBlock {
         code
     }
 
-    pub(crate) fn reduce(&self) -> Option<&Vec<Rc<Buffer>>> {
-        match self.block_type {
-            BlockType::Reduce => Some(&self.outputs),
-            _ => None,
-        }
-    }
+    // #[allow(dead_code)]
+    // pub(crate) fn reduce(&self) -> Option<&Vec<Rc<Buffer>>> {
+    //     match self.block_type {
+    //         BlockType::Reduce => Some(&self.outputs),
+    //         _ => None,
+    //     }
+    // }
 }
 
 impl Task for ThrillerBlock {
     fn emit(&self) -> String {
         let mut code = String::new();
-
+        code += "{\n";
         code += &self.gen_load();
-        code += self.subgraph.emit().as_str();
+        // code += self.subgraph.emit().as_str();
         code += &self.gen_store();
-
+        code += "}\n";
         code
     }
 }
