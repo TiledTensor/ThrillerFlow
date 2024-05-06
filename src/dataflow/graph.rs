@@ -4,7 +4,7 @@ use std::vec::Vec;
 
 use crate::dataflow::{ThrillerEdge, ThrillerNode, ThrillerNodeInner};
 use crate::task::Task;
-use crate::{next_id, MemoryLevel};
+use crate::{next_id, MemoryLevel, ThrillerResult};
 
 /// Thriller Dataflow Graph structure.
 #[allow(dead_code)]
@@ -73,7 +73,7 @@ impl ThrillerGraph {
 }
 
 impl Task for ThrillerGraph {
-    fn emit(&self) -> String {
+    fn emit(&self) -> ThrillerResult<String> {
         #[allow(unused_mut)]
         let mut code = String::new();
         let sorted_nodes = if let Some(sorted_nodes) = &self.sorted_nodes {
@@ -103,7 +103,7 @@ impl Task for ThrillerGraph {
             } else {
                 unreachable!()
             };
-            let mut block_code = block.emit();
+            let mut block_code = block.emit()?;
             block_code.push_str("__syncthreads();\n");
 
             block_codes.push(block_code);
@@ -119,6 +119,6 @@ impl Task for ThrillerGraph {
             compute_codes.push(compute.emit());
         }
 
-        code
+        Ok(code)
     }
 }

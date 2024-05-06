@@ -130,20 +130,20 @@ impl ThrillerBlock {
     //     }
     // }
 
-    #[allow(dead_codeo)]
+    #[allow(dead_code)]
     pub(crate) fn get_mem_level(&self) -> MemoryLevel {
         self.mem_level
     }
 }
 
 impl Task for ThrillerBlock {
-    fn emit(&self) -> String {
+    fn emit(&self) -> ThrillerResult<String> {
         let mut code = String::new();
         code += "{\n";
         code += &self.gen_load();
-        code += self.subgraph.emit().as_str();
+        code += self.subgraph.emit()?.as_str();
         code += &self.gen_store();
         code += "}\n";
-        code
+        Ok(code)
     }
 }
