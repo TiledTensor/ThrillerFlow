@@ -4,10 +4,8 @@ use thriller_flow::{
     initialize, AttachedEdge, BlockType, Buffer, MemoryLevel, Task, ThrillerBlock, ThrillerGraph,
 };
 
-#[test]
-fn test_block() {
+fn main() {
     initialize();
-
     let s_a = Rc::new(Buffer::new("sA"));
     let r_a = Rc::new(Buffer::new("rA"));
     let s_b = Rc::new(Buffer::new("sB"));

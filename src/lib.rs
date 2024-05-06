@@ -5,20 +5,24 @@
 mod access;
 mod buffer;
 mod dataflow;
+mod error;
 mod id;
 mod task;
+mod var;
 
 pub use access::AccessMap;
 pub use buffer::Buffer;
 pub use dataflow::{
     AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
 };
+pub use error::{ThrillerError, ThrillerResult};
 pub use task::Task;
+pub use var::{IterationVar, Var};
 
 use id::ID_COUNTER;
 
 /// GPU Memory Level.
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub enum MemoryLevel {
     /// Register File
     #[default]

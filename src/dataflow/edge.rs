@@ -30,6 +30,11 @@ impl AttachedEdge {
     pub fn get_dst_name(&self) -> &String {
         self.dst.get_name()
     }
+
+    /// Get the access pattern of the edge.
+    pub fn get_access(&self) -> &Option<AccessMap> {
+        &self.access
+    }
 }
 
 /// `ThrillerEdge` repersent load/store in dataflow graph.
@@ -37,19 +42,17 @@ impl AttachedEdge {
 pub struct ThrillerEdge {
     in_nodes: Vec<Rc<ThrillerNode>>,
     out_nodes: Vec<Rc<ThrillerNode>>,
-    out_block: Option<Rc<ThrillerNode>>,
-    access: AccessMap,
+    // access: AccessMap,
     task: Box<dyn Task>,
 }
 
 impl ThrillerEdge {
     /// Create a new empty `ThrillerEdge`.
-    pub fn new(access: AccessMap, task: Box<dyn Task>) -> Self {
+    pub fn new(task: Box<dyn Task>) -> Self {
         ThrillerEdge {
             in_nodes: Vec::new(),
             out_nodes: Vec::new(),
-            out_block: None,
-            access,
+            // access,
             task,
         }
     }

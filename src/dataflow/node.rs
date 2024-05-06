@@ -1,13 +1,15 @@
 use std::rc::Rc;
 
-use crate::dataflow::{ThrillerEdge, ThrillerGraph};
+use crate::dataflow::{ThrillerBlock, ThrillerEdge};
 use crate::task::Task;
+use crate::{next_id, Buffer};
 
 /// `ThrillerNodeInnrer` is an enum to represent either an operation or a block.
 #[allow(dead_code)]
 pub enum ThrillerNodeInner {
     Op(Box<dyn Task>),
-    Block(Rc<ThrillerGraph>),
+    Buffer(Rc<Buffer>),
+    Block(Rc<ThrillerBlock>),
 }
 
 /// A Thriller Dataflow Node that represents either a block of subgraph or an operation.
@@ -31,7 +33,7 @@ impl ThrillerNode {
             out_edges: Vec::new(),
             predecessors: Vec::new(),
             successors: Vec::new(),
-            id: unsafe { crate::id::ID_COUNTER.get_mut().unwrap().next() },
+            id: next_id(),
             in_degrees: 0,
         }
     }
@@ -46,5 +48,9 @@ impl ThrillerNode {
 
     pub(crate) fn get_successors(&self) -> &Vec<Rc<ThrillerNode>> {
         &self.successors
+    }
+
+    pub(crate) fn get_inner(&self) -> &ThrillerNodeInner {
+        &self.inner
     }
 }
