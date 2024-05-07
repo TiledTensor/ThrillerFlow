@@ -51,7 +51,7 @@ fn main() {
                         "[{access} * {iter_var} + {offset}]",
                         access = access[0],
                         iter_var = iter_vars[j].get_name(),
-                        offset = access_offsets[i].0[j]
+                        offset = access_offsets[0].0[j]
                     )
                     .as_str();
                 }
@@ -61,7 +61,7 @@ fn main() {
                         "[{access} * {iter_var} + {offset}]",
                         access = access[1],
                         iter_var = iter_vars[j].get_name(),
-                        offset = access_offsets[i].0[j]
+                        offset = access_offsets[1].0[j]
                     )
                     .as_str();
                 }
@@ -70,7 +70,7 @@ fn main() {
                     access_codes[i] += format!(
                         "[{access} * {iter_var} + {offset}]",
                         access = access[2],
-                        iter_var = iter_vars[j].get_name(),
+                        iter_var = iter_vars[2].get_name(),
                         offset = access_offsets[i].0[j]
                     )
                     .as_str();
