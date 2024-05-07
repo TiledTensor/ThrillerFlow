@@ -2,7 +2,7 @@ use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::dataflow::{AttachedEdge, ThrillerGraph};
-use crate::error::{ThrillerError, ThrillerResult};
+use crate::error::ThrillerResult;
 use crate::task::Task;
 use crate::MemoryLevel;
 
@@ -42,19 +42,19 @@ impl ThrillerBlock {
         }
     }
 
-    pub(crate) fn gen_loop(&mut self) -> ThrillerResult<String> {
-        let mut code = String::new();
+    // pub(crate) fn gen_loop(&mut self) -> ThrillerResult<String> {
+    //     let mut code = String::new();
 
-        // Check if input edges have the same access pattern.
-        let access_map = self.inputs[0].get_access().as_ref().unwrap();
-        for input in &self.inputs {
-            if input.get_access().as_ref().unwrap() != access_map {
-                return Err(ThrillerError::InvalidAccessPattern);
-            }
-        }
+    //     // Check if input edges have the same access pattern.
+    //     let access_map = self.inputs[0].get_access().as_ref().unwrap();
+    //     for input in &self.inputs {
+    //         if input.get_access().as_ref().unwrap() != access_map {
+    //             return Err(ThrillerError::InvalidAccessPattern);
+    //         }
+    //     }
 
-        Ok(code)
-    }
+    //     Ok(code)
+    // }
 
     /// Generate load code for the block inputs.
     pub(crate) fn gen_load(&self) -> String {

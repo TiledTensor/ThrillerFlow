@@ -25,7 +25,7 @@ fn main() {
         BlockType::Map,
     );
 
-    let code = block.emit();
+    let code = block.emit().unwrap();
 
     println!("{}", code);
 }

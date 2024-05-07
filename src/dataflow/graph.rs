@@ -34,7 +34,7 @@ impl ThrillerGraph {
     }
 
     /// Topological sort the nodes in the graph.
-    pub fn topo_sort(&self) -> &Vec<Rc<ThrillerNode>> {
+    pub fn topo_sort(&self) -> Vec<Rc<ThrillerNode>> {
         let mut sorted_nodes = Vec::new();
         // (id, (in_degrees, node))
         let mut in_degrees: HashMap<usize, (usize, &Rc<ThrillerNode>)> = HashMap::new();
@@ -63,7 +63,8 @@ impl ThrillerGraph {
 
         // self.sorted_nodes = Some(sorted_nodes);
 
-        self.sorted_nodes.as_ref().unwrap()
+        // self.sorted_nodes.as_ref().unwrap()
+        sorted_nodes
     }
 
     /// Get the sorted nodes of the graph.
@@ -76,11 +77,13 @@ impl Task for ThrillerGraph {
     fn emit(&self) -> ThrillerResult<String> {
         #[allow(unused_mut)]
         let mut code = String::new();
-        let sorted_nodes = if let Some(sorted_nodes) = &self.sorted_nodes {
-            sorted_nodes
-        } else {
-            self.topo_sort()
-        };
+        // let sorted_nodes = if let Some(sorted_nodes) = &self.sorted_nodes {
+        //     sorted_nodes
+        // } else {
+        //     self.topo_sort()
+        // };
+
+        let sorted_nodes = self.topo_sort();
 
         let mut compute_nodes = Vec::new();
         let mut block_nodes = Vec::new();

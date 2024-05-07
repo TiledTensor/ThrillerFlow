@@ -10,7 +10,7 @@ mod id;
 mod task;
 mod var;
 
-pub use access::AccessMap;
+pub use access::{AccessMap, AccessMatrix, AccessOffset};
 pub use buffer::Buffer;
 pub use dataflow::{
     AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
