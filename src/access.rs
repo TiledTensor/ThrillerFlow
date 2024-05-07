@@ -58,6 +58,7 @@ impl AccessMap {
     {
         // assert_eq!(self.loop_depth, self.iter_vars.len());
         let mut code = String::new();
+        let mut indent = 0;
         if self.loop_depth != self.iter_vars.len() {
             return Err(ThrillerError::LoopMisMatch);
         }
@@ -66,18 +67,28 @@ impl AccessMap {
             let name = var.get_name();
 
             code.push_str(&format!(
-                "for(int {var} = {start}, {var} < {end}; {var}++){{\n",
+                "{indent}for(int {var} = {start}, {var} < {end}; {var}++){{\n",
+                indent = " ".repeat(indent),
                 var = name,
                 start = start,
                 end = end
             ));
 
-            // code.push_str("}\n");
-            code.push_str(op(&self.access_matrixs, &self.offset)?.as_str());
+            indent += 4;
         }
 
+        code.push_str(
+            format!(
+                "{indent}{code}",
+                indent = " ".repeat(indent),
+                code = op(&self.access_matrixs, &self.offset)?.as_str()
+            )
+            .as_str(),
+        );
+
         for _ in 0..self.loop_depth {
-            code.push_str("}\n");
+            indent -= 4;
+            code.push_str(format!("{indent}}}\n", indent = " ".repeat(indent)).as_str());
         }
 
         Ok(code)
