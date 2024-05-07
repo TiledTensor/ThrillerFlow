@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use std::vec::Vec;
 
+use crate::access::{AccessMatrix, AccessOffset};
 use crate::dataflow::{AttachedEdge, ThrillerGraph};
 use crate::error::ThrillerResult;
 use crate::task::Task;
@@ -42,22 +43,23 @@ impl ThrillerBlock {
         }
     }
 
-    // pub(crate) fn gen_loop(&mut self) -> ThrillerResult<String> {
-    //     let mut code = String::new();
+    pub(crate) fn gen_loop_load(&self) -> ThrillerResult<String> {
+        let mut code = String::new();
+        for edge in self.inputs.iter() {
+            if let Some(access) = edge.get_access() {
+                // TODO: Add access pattern support for load operation.
+                let load = |_access_matrixs: &Vec<AccessMatrix>,
+                            _access_offsets: &Vec<AccessOffset>|
+                 -> ThrillerResult<String> { self.gen_load() };
 
-    //     // Check if input edges have the same access pattern.
-    //     let access_map = self.inputs[0].get_access().as_ref().unwrap();
-    //     for input in &self.inputs {
-    //         if input.get_access().as_ref().unwrap() != access_map {
-    //             return Err(ThrillerError::InvalidAccessPattern);
-    //         }
-    //     }
-
-    //     Ok(code)
-    // }
+                code += access.gen_loop_access(load)?.as_str();
+            }
+        }
+        Ok(code)
+    }
 
     /// Generate load code for the block inputs.
-    pub(crate) fn gen_load(&self) -> String {
+    pub(crate) fn gen_load(&self) -> ThrillerResult<String> {
         let mut code = String::new();
 
         // Generate load inputs.
@@ -84,11 +86,11 @@ impl ThrillerBlock {
 
             _ => {}
         }
-        code
+        Ok(code)
     }
 
     /// Generate store code for the block outputs.
-    pub(crate) fn gen_store(&self) -> String {
+    pub(crate) fn gen_store(&self) -> ThrillerResult<String> {
         let mut code = String::new();
 
         // Generate store outputs.
@@ -119,7 +121,7 @@ impl ThrillerBlock {
 
             BlockType::Reduce => {}
         }
-        code
+        Ok(code)
     }
 
     // #[allow(dead_code)]
@@ -139,11 +141,9 @@ impl ThrillerBlock {
 impl Task for ThrillerBlock {
     fn emit(&self) -> ThrillerResult<String> {
         let mut code = String::new();
-        code += "{\n";
-        code += &self.gen_load();
-        code += self.subgraph.emit()?.as_str();
-        code += &self.gen_store();
-        code += "}\n";
+        code += &self.gen_loop_load()?;
+        // code += self.subgraph.emit()?.as_str();
+        code += &self.gen_store()?;
         Ok(code)
     }
 }

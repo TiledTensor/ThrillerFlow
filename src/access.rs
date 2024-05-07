@@ -52,7 +52,7 @@ impl AccessMap {
     }
 
     /// Generate loop based on `AccessMap` information.
-    pub fn gen_loop<F>(&self, op: F) -> ThrillerResult<String>
+    pub fn gen_loop_access<F>(&self, op: F) -> ThrillerResult<String>
     where
         F: Fn(&Vec<AccessMatrix>, &Vec<AccessOffset>) -> ThrillerResult<String>,
     {
@@ -77,14 +77,14 @@ impl AccessMap {
             indent += 4;
         }
 
-        code.push_str(
-            format!(
-                "{indent}{code}",
-                indent = " ".repeat(indent),
-                code = op(&self.access_matrixs, &self.offset)?.as_str()
-            )
-            .as_str(),
-        );
+        let access_code = op(&self.access_matrixs, &self.offset)?;
+        let access_lines: Vec<&str> = access_code.lines().collect();
+
+        access_lines.iter().for_each(|line| {
+            code.push_str(
+                format!("{indent}{line}\n", indent = " ".repeat(indent), line = line).as_str(),
+            );
+        });
 
         for _ in 0..self.loop_depth {
             indent -= 4;

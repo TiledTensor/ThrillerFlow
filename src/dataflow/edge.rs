@@ -12,12 +12,12 @@ pub struct AttachedEdge {
     src: Rc<Buffer>,
     dst: Rc<Buffer>,
     #[allow(dead_code)]
-    access: Option<AccessMap>,
+    access: Option<Rc<AccessMap>>,
 }
 
 impl AttachedEdge {
     /// Create a new `AttachedEdge` with the given source and destination buffers.
-    pub fn new(src: Rc<Buffer>, dst: Rc<Buffer>, access: Option<AccessMap>) -> Self {
+    pub fn new(src: Rc<Buffer>, dst: Rc<Buffer>, access: Option<Rc<AccessMap>>) -> Self {
         AttachedEdge { src, dst, access }
     }
 
@@ -32,8 +32,13 @@ impl AttachedEdge {
     }
 
     /// Get the access pattern of the edge.
-    pub fn get_access(&self) -> &Option<AccessMap> {
+    pub fn get_access(&self) -> &Option<Rc<AccessMap>> {
         &self.access
+    }
+
+    /// Replace the access pattern of the edge.
+    pub fn replace_access_map(&mut self, access: Rc<AccessMap>) {
+        self.access = Some(access);
     }
 }
 

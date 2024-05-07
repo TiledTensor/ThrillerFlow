@@ -1,4 +1,4 @@
-EXAMPLE 	?= access
+EXAMPLE 	?= rf_block
 
 .PHONY: build test clean example
 
