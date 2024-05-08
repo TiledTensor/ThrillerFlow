@@ -61,6 +61,11 @@ impl AccessMap {
         &self.offset
     }
 
+    /// Get Loop depth of AccessMap
+    pub fn get_loop_depth(&self) -> usize {
+        self.loop_depth
+    }
+
     /// Generate loop based on `AccessMap` information.
     pub fn gen_loop_access<F>(&self, op: F) -> ThrillerResult<String>
     where

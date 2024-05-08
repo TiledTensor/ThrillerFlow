@@ -2,8 +2,9 @@ use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::dataflow::{AttachedEdge, ThrillerGraph};
-use crate::error::ThrillerResult;
+use crate::error::{ThrillerError, ThrillerResult};
 use crate::task::Task;
+use crate::var::Var;
 use crate::{AccessMap, MemoryLevel};
 
 /// A map relation from inputs into outputs.
@@ -47,7 +48,9 @@ impl ThrillerBlock {
         for edge in self.inputs.iter() {
             if let Some(access) = edge.get_access() {
                 // TODO: Add access pattern support for load operation.
-                let load = |_access_map: &AccessMap| -> ThrillerResult<String> { self.gen_load() };
+                let load = |access_map: &AccessMap| -> ThrillerResult<String> {
+                    self.gen_load(access_map)
+                };
 
                 code += access.gen_loop_access(load)?.as_str();
             }
@@ -56,17 +59,38 @@ impl ThrillerBlock {
     }
 
     /// Generate load code for the block inputs.
-    pub(crate) fn gen_load(&self) -> ThrillerResult<String> {
+    pub(crate) fn gen_load(&self, _access_map: &AccessMap) -> ThrillerResult<String> {
+        // TODO: This is not a final version of the load code generation. It is just a pseudocode representation of the formalized data flow.
         let mut code = String::new();
-
         // Generate load inputs.
         match self.mem_level {
             MemoryLevel::Register => {
                 for input in &self.inputs {
+                    let access_map = input
+                        .get_access()
+                        .as_ref()
+                        .ok_or(ThrillerError::MissingAccessMap)?;
+
+                    let loop_depth = access_map.get_loop_depth();
+                    if loop_depth != 1 {
+                        return Err(ThrillerError::InvalidLoadAccess);
+                    }
+
+                    let offsets = access_map.get_access_offsets();
+                    let matrixs = access_map.get_access_matrixs();
+
+                    let iter_vars = access_map.get_iter_vars();
+
                     code.push_str(&format!(
-                        "copy_2d_tile_s2r({}, {});\n",
-                        input.get_src_name(),
-                        input.get_dst_name()
+                        "copy_2d_tile_s2r({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
+                        src = input.get_src_name(),
+                        src_access = matrixs[0].0[0][0],
+                        src_offset = offsets[0].0[0],
+                        src_index = iter_vars[0].get_name(),
+                        dst = input.get_dst_name(),
+                        dst_index = iter_vars[0].get_name(),
+                        dst_offset = offsets[1].0[0],
+                        dst_access = matrixs[1].0[0][0]
                     ));
                 }
             }

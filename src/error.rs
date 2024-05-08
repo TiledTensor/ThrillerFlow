@@ -5,6 +5,10 @@ pub enum ThrillerError {
     InvalidAccessPattern,
     /// The given loop mismatch.
     LoopMisMatch,
+    /// The access map is missing.
+    MissingAccessMap,
+    /// Invalid Load Access Pattern.
+    InvalidLoadAccess,
 }
 
 /// Result type for thriller crate functions.
