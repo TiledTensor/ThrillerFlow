@@ -34,9 +34,9 @@ fn main() {
     access_map.add_access_offset(AccessOffset(vec![1, 0]));
     access_map.add_access_offset(AccessOffset(vec![0, 0]));
 
-    let mul_add_op = |access_matrixs: &Vec<AccessMatrix>,
-                      access_offsets: &Vec<AccessOffset>|
-     -> ThrillerResult<String> {
+    let mul_add_op = |access_map: &AccessMap| -> ThrillerResult<String> {
+        let access_matrixs = access_map.get_access_matrixs();
+        let access_offsets = access_map.get_access_offsets();
         if access_matrixs.len() != 3 || access_offsets.len() != 3 {
             return Err(ThrillerError::InvalidAccessPattern);
         }

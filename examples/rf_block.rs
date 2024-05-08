@@ -18,7 +18,7 @@ fn main() {
     let s_c = Rc::new(Buffer::new("sC"));
     let out_edge = AttachedEdge::new(acc, s_c, None);
 
-    let iter_var = Rc::new(IterationVar::new("kK", (0, 10)));
+    let iter_var = Rc::new(IterationVar::new("i", (0, 10)));
 
     let mut access_map = AccessMap::new(1, vec![1]);
     access_map.add_iter_var(iter_var);

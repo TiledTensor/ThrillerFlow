@@ -51,10 +51,20 @@ impl AccessMap {
         self.offset.push(access_offset);
     }
 
+    /// Get access matrixs in access map.
+    pub fn get_access_matrixs(&self) -> &Vec<AccessMatrix> {
+        &self.access_matrixs
+    }
+
+    /// Get access offsets in access map.
+    pub fn get_access_offsets(&self) -> &Vec<AccessOffset> {
+        &self.offset
+    }
+
     /// Generate loop based on `AccessMap` information.
     pub fn gen_loop_access<F>(&self, op: F) -> ThrillerResult<String>
     where
-        F: Fn(&Vec<AccessMatrix>, &Vec<AccessOffset>) -> ThrillerResult<String>,
+        F: Fn(&AccessMap) -> ThrillerResult<String>,
     {
         // assert_eq!(self.loop_depth, self.iter_vars.len());
         let mut code = String::new();
@@ -77,7 +87,7 @@ impl AccessMap {
             indent += 4;
         }
 
-        let access_code = op(&self.access_matrixs, &self.offset)?;
+        let access_code = op(self)?;
         let access_lines: Vec<&str> = access_code.lines().collect();
 
         access_lines.iter().for_each(|line| {

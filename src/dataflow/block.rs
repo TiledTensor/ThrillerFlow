@@ -1,11 +1,10 @@
 use std::rc::Rc;
 use std::vec::Vec;
 
-use crate::access::{AccessMatrix, AccessOffset};
 use crate::dataflow::{AttachedEdge, ThrillerGraph};
 use crate::error::ThrillerResult;
 use crate::task::Task;
-use crate::MemoryLevel;
+use crate::{AccessMap, MemoryLevel};
 
 /// A map relation from inputs into outputs.
 pub enum BlockType {
@@ -48,9 +47,7 @@ impl ThrillerBlock {
         for edge in self.inputs.iter() {
             if let Some(access) = edge.get_access() {
                 // TODO: Add access pattern support for load operation.
-                let load = |_access_matrixs: &Vec<AccessMatrix>,
-                            _access_offsets: &Vec<AccessOffset>|
-                 -> ThrillerResult<String> { self.gen_load() };
+                let load = |_access_map: &AccessMap| -> ThrillerResult<String> { self.gen_load() };
 
                 code += access.gen_loop_access(load)?.as_str();
             }
