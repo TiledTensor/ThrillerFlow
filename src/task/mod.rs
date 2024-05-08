@@ -1,5 +1,6 @@
 use crate::ThrillerResult;
 
+mod compute;
 mod copy;
 
 /// A trait to represent a task.
