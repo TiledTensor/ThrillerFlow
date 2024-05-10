@@ -14,9 +14,10 @@ pub use access::{AccessMap, AccessMatrix, AccessOffset};
 pub use buffer::Buffer;
 pub use dataflow::{
     AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
+    ThrillerNodeInner,
 };
 pub use error::{ThrillerError, ThrillerResult};
-pub use task::Task;
+pub use task::{Gemm, Task};
 pub use var::{IterationVar, Var};
 
 use id::ID_COUNTER;

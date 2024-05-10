@@ -1,10 +1,8 @@
 use std::rc::Rc;
-use std::vec::Vec;
 
 use crate::access::AccessMap;
 use crate::buffer::Buffer;
-use crate::dataflow::ThrillerNode;
-use crate::task::Task;
+use crate::dataflow::{ThrillerNode, ThrillerNodeInner};
 
 /// AttachedEdge is an edge that connects a source and destination buffer
 /// with additional access pattern information `AccessMap`.
@@ -45,20 +43,33 @@ impl AttachedEdge {
 /// `ThrillerEdge` repersent load/store in dataflow graph.
 #[allow(dead_code)]
 pub struct ThrillerEdge {
-    in_nodes: Vec<Rc<ThrillerNode>>,
-    out_nodes: Vec<Rc<ThrillerNode>>,
-    // access: AccessMap,
-    task: Box<dyn Task>,
+    src: Rc<ThrillerNode>,
+    dst: Rc<ThrillerNode>,
 }
 
 impl ThrillerEdge {
     /// Create a new empty `ThrillerEdge`.
-    pub fn new(task: Box<dyn Task>) -> Self {
+    pub fn new(src: Rc<ThrillerNode>, dst: Rc<ThrillerNode>) -> Self {
         ThrillerEdge {
-            in_nodes: Vec::new(),
-            out_nodes: Vec::new(),
             // access,
-            task,
+            src,
+            dst,
+        }
+    }
+
+    /// Get the source node name of the edge.
+    pub fn get_src_name(&self) -> &String {
+        match self.src.get_inner() {
+            ThrillerNodeInner::Buffer(buffer) => buffer.get_name(),
+            _ => panic!("Source is not a buffer"),
+        }
+    }
+
+    /// Get the destination node name of the edge.
+    pub fn get_dst_name(&self) -> &String {
+        match self.dst.get_inner() {
+            ThrillerNodeInner::Buffer(buffer) => buffer.get_name(),
+            _ => panic!("Destination is not a buffer"),
         }
     }
 }

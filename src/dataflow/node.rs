@@ -7,8 +7,11 @@ use crate::{next_id, Buffer};
 /// `ThrillerNodeInnrer` is an enum to represent either an operation or a block.
 #[allow(dead_code)]
 pub enum ThrillerNodeInner {
+    /// An operation.
     Op(Box<dyn Task>),
+    /// A buffer.
     Buffer(Rc<Buffer>),
+    /// A subgraph block.
     Block(Rc<ThrillerBlock>),
 }
 

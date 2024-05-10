@@ -9,6 +9,8 @@ pub enum ThrillerError {
     MissingAccessMap,
     /// Invalid Load Access Pattern.
     InvalidLoadAccess,
+    /// Wrong Inputs Number.
+    WrongInputsNum,
 }
 
 /// Result type for thriller crate functions.
