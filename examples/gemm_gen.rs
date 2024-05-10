@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
 use thriller_flow::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationVar, ThrillerEdge,
-    ThrillerNode, ThrillerNodeInner,
+    initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationBound, IterationVar,
+    ThrillerEdge, ThrillerNode, ThrillerNodeInner,
 };
 
 fn main() {
@@ -23,7 +23,10 @@ fn main() {
     let edge_b = Rc::new(ThrillerEdge::new(node_b.clone(), gemm_node.clone()));
     let edge_acc = Rc::new(ThrillerEdge::new(gemm_node.clone(), node_acc.clone()));
 
-    let iter_var = Rc::new(IterationVar::new("i", (0, 10)));
+    let iter_var = Rc::new(IterationVar::new(
+        "i",
+        (IterationBound::Fixed(0), IterationBound::Fixed(10)),
+    ));
 
     let mut access_map = AccessMap::new(1, vec![1]);
     access_map.add_iter_var(iter_var);

@@ -1,7 +1,8 @@
 mod iteration;
 mod regular;
 
-pub use iteration::IterationVar;
+pub use iteration::{IterationBound, IterationVar};
+pub use regular::RegularVar;
 /// A trait for variable.
 pub trait Var {
     /// Get the name of the variable.

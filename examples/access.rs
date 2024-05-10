@@ -1,8 +1,8 @@
 use std::{rc::Rc, vec};
 
 use thriller_flow::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, IterationVar, ThrillerError, ThrillerResult,
-    Var,
+    initialize, AccessMap, AccessMatrix, AccessOffset, IterationBound, IterationVar, ThrillerError,
+    ThrillerResult, Var,
 };
 
 fn main() {
@@ -17,9 +17,18 @@ fn main() {
      * }
      */
 
-    let iter_var1 = Rc::new(IterationVar::new("i1", (0, 10)));
-    let iter_var2 = Rc::new(IterationVar::new("i2", (0, 10)));
-    let iter_var3 = Rc::new(IterationVar::new("i3", (0, 10)));
+    let iter_var1 = Rc::new(IterationVar::new(
+        "i1",
+        (IterationBound::Fixed(0), IterationBound::Fixed(10)),
+    ));
+    let iter_var2 = Rc::new(IterationVar::new(
+        "i2",
+        (IterationBound::Fixed(0), IterationBound::Fixed(10)),
+    ));
+    let iter_var3 = Rc::new(IterationVar::new(
+        "i3",
+        (IterationBound::Fixed(0), IterationBound::Fixed(10)),
+    ));
 
     let mut access_map = AccessMap::new(3, vec![2, 2, 2]);
     access_map.add_iter_var(iter_var1);

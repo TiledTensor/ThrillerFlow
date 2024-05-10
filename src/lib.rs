@@ -18,7 +18,7 @@ pub use dataflow::{
 };
 pub use error::{ThrillerError, ThrillerResult};
 pub use task::{Gemm, Task};
-pub use var::{IterationVar, Var};
+pub use var::{IterationBound, IterationVar, RegularVar, Var};
 
 use id::ID_COUNTER;
 

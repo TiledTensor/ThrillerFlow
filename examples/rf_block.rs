@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use thriller_flow::{
     initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer,
-    IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerGraph,
+    IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerGraph,
 };
 
 fn main() {
@@ -18,7 +18,10 @@ fn main() {
     let s_c = Rc::new(Buffer::new("sC"));
     let out_edge = AttachedEdge::new(acc, s_c, None);
 
-    let iter_var = Rc::new(IterationVar::new("i", (0, 10)));
+    let iter_var = Rc::new(IterationVar::new(
+        "i",
+        (IterationBound::Fixed(0), IterationBound::Fixed(10)),
+    ));
 
     let mut access_map = AccessMap::new(1, vec![1]);
     access_map.add_iter_var(iter_var);

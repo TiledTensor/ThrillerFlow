@@ -1,16 +1,44 @@
-use super::Var;
+use std::fmt::{Debug, Display};
+
+use super::{regular::RegularVar, Var};
 use crate::next_id;
+
+/// A bound of the iteration variable.
+pub enum IterationBound {
+    /// A fixed bound.
+    Fixed(usize),
+    /// A variable bound.
+    Var(RegularVar),
+}
+
+impl Debug for IterationBound {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            IterationBound::Fixed(val) => write!(f, "{}", val),
+            IterationBound::Var(var) => write!(f, "{:?}", var.get_name()),
+        }
+    }
+}
+
+impl Display for IterationBound {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            IterationBound::Fixed(val) => write!(f, "{}", val),
+            IterationBound::Var(var) => write!(f, "{}", var.get_name()),
+        }
+    }
+}
 
 /// A Variable that represents a loop index.
 pub struct IterationVar {
     name: String,
     id: usize,
-    domain: (usize, usize),
+    domain: (IterationBound, IterationBound),
 }
 
 impl IterationVar {
     /// Create a new `IterationVar` with the given name.
-    pub fn new(name: &str, domain: (usize, usize)) -> Self {
+    pub fn new(name: &str, domain: (IterationBound, IterationBound)) -> Self {
         let id = next_id();
         IterationVar {
             name: name.to_string(),
@@ -25,8 +53,8 @@ impl IterationVar {
     }
 
     /// Get the domain of the iteration variable.
-    pub fn get_domain(&self) -> (usize, usize) {
-        self.domain
+    pub fn get_domain(&self) -> &(IterationBound, IterationBound) {
+        &self.domain
     }
 }
 

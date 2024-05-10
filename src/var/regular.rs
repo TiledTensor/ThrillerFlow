@@ -1,5 +1,6 @@
 use crate::Var;
 
+/// A regular variable.
 pub struct RegularVar {
     name: String,
     id: usize,

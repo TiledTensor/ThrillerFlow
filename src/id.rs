@@ -7,11 +7,11 @@ pub struct IdCounter {
 }
 
 impl IdCounter {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         IdCounter { id: 0 }
     }
 
-    pub fn next(&mut self) -> usize {
+    pub(crate) fn next(&mut self) -> usize {
         let id = self.id;
         self.id += 1;
         id
