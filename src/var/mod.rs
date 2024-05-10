@@ -1,4 +1,5 @@
 mod iteration;
+mod regular;
 
 pub use iteration::IterationVar;
 /// A trait for variable.
