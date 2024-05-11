@@ -1,0 +1,18 @@
+[package]
+name = "tests"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+
+[dev-dependencies]
+thriller_core = { path = "../thriller-core" }
+thriller_utils = { path = "../thriller-utils" }
+
+[[test]]
+name = "block"
+path = "block.rs"
+
+[[test]]
+name = "id"
+path = "id.rs"

@@ -1,4 +1,4 @@
-use thriller_flow::initialize;
+use thriller_core::initialize;
 
 #[test]
 fn test_id_generation() {

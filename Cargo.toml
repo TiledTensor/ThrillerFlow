@@ -6,4 +6,5 @@ members = [
 
     # Internal
     "examples",
+    "tests",
 ]

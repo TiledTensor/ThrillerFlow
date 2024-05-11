@@ -158,6 +158,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "tests"
+version = "0.0.0"
+dependencies = [
+ "thriller_core",
+ "thriller_utils",
+]
+
+[[package]]
 name = "thriller_core"
 version = "0.1.0"
 dependencies = [

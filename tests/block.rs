@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use thriller_flow::{
+use thriller_core::{
     initialize, AttachedEdge, BlockType, Buffer, MemoryLevel, Task, ThrillerBlock, ThrillerGraph,
 };
 
