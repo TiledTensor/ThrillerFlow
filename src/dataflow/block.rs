@@ -157,14 +157,18 @@ impl ThrillerBlock {
     pub(crate) fn get_mem_level(&self) -> MemoryLevel {
         self.mem_level
     }
-}
 
-impl Task for ThrillerBlock {
-    fn emit(&self) -> ThrillerResult<String> {
+    pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();
         code += &self.gen_loop_load()?;
         // code += self.subgraph.emit()?.as_str();
         code += &self.gen_store()?;
         Ok(code)
+    }
+}
+
+impl Task for ThrillerBlock {
+    fn emit(&self) -> ThrillerResult<String> {
+        self.emit_block()
     }
 }

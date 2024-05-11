@@ -50,11 +50,7 @@ pub struct ThrillerEdge {
 impl ThrillerEdge {
     /// Create a new empty `ThrillerEdge`.
     pub fn new(src: Rc<ThrillerNode>, dst: Rc<ThrillerNode>) -> Self {
-        ThrillerEdge {
-            // access,
-            src,
-            dst,
-        }
+        ThrillerEdge { src, dst }
     }
 
     /// Get the source node name of the edge.

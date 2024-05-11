@@ -1,20 +1,35 @@
 use std::rc::Rc;
 
-use crate::{AccessMap, Task, ThrillerEdge, ThrillerError, ThrillerResult, Var};
+use crate::{AccessMap, Task, ThrillerError, ThrillerNode, ThrillerResult, Var};
 
 /// Gemm is a task that performs matrix multiplication.
-#[derive(Clone, Copy)]
-pub struct Gemm;
+// #[derive(Clone, Copy)]
+pub struct Gemm {
+    // inputs: Vec<Rc<ThrillerEdge>>,
+    // output: Rc<ThrillerEdge>,
+    prevs: Vec<Rc<ThrillerNode>>,
+    next: Rc<ThrillerNode>,
+    access_map: AccessMap,
+}
 
 impl Gemm {
-    /// Generate the GEMM task.
-    pub fn emit_(
-        &self,
-        inputs: &[Rc<ThrillerEdge>],
-        output: &Rc<ThrillerEdge>,
-        access_map: &AccessMap,
-    ) -> ThrillerResult<String> {
-        if inputs.len() != 2 {
+    /// Create a new GEMM task.
+    pub fn new(
+        prevs: Vec<Rc<ThrillerNode>>,
+        next: Rc<ThrillerNode>,
+        access_map: AccessMap,
+    ) -> Self {
+        Gemm {
+            prevs,
+            next,
+            access_map,
+        }
+    }
+}
+
+impl Task for Gemm {
+    fn emit(&self) -> ThrillerResult<String> {
+        if self.prevs.len() != 2 {
             return Err(ThrillerError::WrongInputsNum);
         }
 
@@ -51,23 +66,17 @@ impl Gemm {
                 a = access_codes[0],
                 b = access_codes[1],
                 c = access_codes[2],
-                buf_a = inputs[0].get_src_name(),
-                buf_b = inputs[1].get_src_name(),
-                buf_c = output.get_dst_name()
+                buf_a = self.prevs[0].get_name(),
+                buf_b = self.prevs[1].get_name(),
+                buf_c = self.next.get_name()
             )
             .as_str();
 
             Ok(code)
         };
 
-        code += access_map.gen_loop_access(gemm)?.as_str();
+        code += self.access_map.gen_loop_access(gemm)?.as_str();
 
         Ok(code)
-    }
-}
-
-impl Task for Gemm {
-    fn emit(&self) -> ThrillerResult<String> {
-        todo!()
     }
 }

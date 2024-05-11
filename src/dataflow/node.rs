@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::dataflow::{ThrillerBlock, ThrillerEdge};
 use crate::task::Task;
-use crate::{next_id, Buffer};
+use crate::{next_id, Buffer, ThrillerResult};
 
 /// `ThrillerNodeInnrer` is an enum to represent either an operation or a block.
 #[allow(dead_code)]
@@ -41,6 +41,13 @@ impl ThrillerNode {
         }
     }
 
+    pub(crate) fn get_name(&self) -> String {
+        match self.inner.as_ref() {
+            ThrillerNodeInner::Buffer(buffer) => buffer.get_name().clone(),
+            _ => panic!("Node is not a buffer"),
+        }
+    }
+
     pub(crate) fn get_id(&self) -> usize {
         self.id
     }
@@ -55,5 +62,14 @@ impl ThrillerNode {
 
     pub(crate) fn get_inner(&self) -> &ThrillerNodeInner {
         &self.inner
+    }
+}
+
+impl Task for ThrillerNode {
+    fn emit(&self) -> ThrillerResult<String> {
+        match self.inner.as_ref() {
+            ThrillerNodeInner::Op(task) => task.emit(),
+            _ => panic!("Node is not an operation"),
+        }
     }
 }
