@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use thriller_flow::{
     initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationBound, IterationVar,
@@ -26,15 +26,19 @@ fn main() {
     let buf_b = Rc::new(Buffer::new("rB"));
     let buf_acc = Rc::new(Buffer::new("acc"));
 
-    let node_a = Rc::new(ThrillerNode::new(ThrillerNodeInner::Buffer(buf_a.clone())));
-    let node_b = Rc::new(ThrillerNode::new(ThrillerNodeInner::Buffer(buf_b.clone())));
-    let node_acc = Rc::new(ThrillerNode::new(ThrillerNodeInner::Buffer(
+    let node_a = Rc::new(RefCell::new(ThrillerNode::new(ThrillerNodeInner::Buffer(
+        buf_a.clone(),
+    ))));
+    let node_b = Rc::new(RefCell::new(ThrillerNode::new(ThrillerNodeInner::Buffer(
+        buf_b.clone(),
+    ))));
+    let node_acc = Rc::new(RefCell::new(ThrillerNode::new(ThrillerNodeInner::Buffer(
         buf_acc.clone(),
-    )));
+    ))));
     let gemm = Gemm::new(
         vec![node_a.clone(), node_b.clone()],
         node_acc.clone(),
-        access_map,
+        Rc::new(access_map),
     );
     let gemm_node = Rc::new(ThrillerNode::new(ThrillerNodeInner::Op(Box::new(gemm))));
 

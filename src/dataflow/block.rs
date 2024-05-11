@@ -5,7 +5,7 @@ use crate::dataflow::{AttachedEdge, ThrillerGraph};
 use crate::error::{ThrillerError, ThrillerResult};
 use crate::task::Task;
 use crate::var::Var;
-use crate::{AccessMap, MemoryLevel};
+use crate::{next_id, AccessMap, MemoryLevel};
 
 /// A map relation from inputs into outputs.
 pub enum BlockType {
@@ -23,6 +23,7 @@ pub struct ThrillerBlock {
     #[allow(dead_code)]
     subgraph: Rc<ThrillerGraph>,
     block_type: BlockType,
+    id: usize,
 }
 
 impl ThrillerBlock {
@@ -40,6 +41,7 @@ impl ThrillerBlock {
             mem_level,
             subgraph,
             block_type,
+            id: next_id(),
         }
     }
 
@@ -170,5 +172,9 @@ impl ThrillerBlock {
 impl Task for ThrillerBlock {
     fn emit(&self) -> ThrillerResult<String> {
         self.emit_block()
+    }
+
+    fn get_name(&self) -> String {
+        format!("block_{}", self.id)
     }
 }

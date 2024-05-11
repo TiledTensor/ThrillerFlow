@@ -2,23 +2,16 @@ use std::vec;
 use std::{cell::RefCell, rc::Rc};
 
 use thriller_flow::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer, Gemm,
-    IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerEdge, ThrillerGraph,
-    ThrillerNode, ThrillerNodeInner,
+    initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationBound, IterationVar,
+    MemoryLevel, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 
 fn main() {
     initialize();
-    let s_a = Rc::new(Buffer::new("sA"));
     let r_a = Rc::new(Buffer::new("rA"));
-    let s_b = Rc::new(Buffer::new("sB"));
     let r_b = Rc::new(Buffer::new("rB"));
-    let mut in_edge0 = AttachedEdge::new(s_a, r_a.clone(), None);
-    let mut in_edge1 = AttachedEdge::new(s_b, r_b.clone(), None);
 
     let acc = Rc::new(Buffer::new("acc"));
-    let s_c = Rc::new(Buffer::new("sC"));
-    let out_edge = AttachedEdge::new(acc.clone(), s_c, None);
 
     let iter_var = Rc::new(IterationVar::new(
         "i",
@@ -35,9 +28,6 @@ fn main() {
     access_map.add_access_offset(AccessOffset(vec![0]));
 
     let access_map = Rc::new(access_map);
-
-    in_edge0.replace_access_map(access_map.clone());
-    in_edge1.replace_access_map(access_map.clone());
 
     let mut subgraph = ThrillerGraph::new(MemoryLevel::Register);
 
@@ -69,22 +59,23 @@ fn main() {
     let rb_gemm_edge_ref = Rc::new(rb_gemm_edge);
     let gemm_acc_edge_ref = Rc::new(gemm_acc_edge);
 
-    subgraph.add_nodes(vec![r_a_node.clone(), r_b_node.clone(), acc_node.clone()]);
+    subgraph.add_nodes(vec![
+        r_a_node.clone(),
+        r_b_node.clone(),
+        acc_node.clone(),
+        gemm_node.clone(),
+    ]);
     subgraph.add_edges(vec![
         ra_gemm_edge_ref.clone(),
         rb_gemm_edge_ref.clone(),
         gemm_acc_edge_ref.clone(),
     ]);
 
-    let block = ThrillerBlock::new(
-        vec![Rc::new(in_edge0), Rc::new(in_edge1)],
-        vec![Rc::new(out_edge)],
-        MemoryLevel::Register,
-        Rc::new(subgraph),
-        BlockType::Map,
-    );
+    subgraph.connect();
 
-    let code = block.emit().unwrap();
+    let sort_nodes = subgraph.topo_sort();
 
-    println!("{}", code);
+    for node in sort_nodes {
+        println!("Node: {:?}", node.borrow().get_node_name());
+    }
 }

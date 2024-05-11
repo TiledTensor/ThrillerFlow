@@ -1,28 +1,31 @@
+use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::{AccessMap, Task, ThrillerError, ThrillerNode, ThrillerResult, Var};
+use crate::{next_id, AccessMap, Task, ThrillerError, ThrillerNode, ThrillerResult, Var};
 
 /// Gemm is a task that performs matrix multiplication.
 // #[derive(Clone, Copy)]
 pub struct Gemm {
     // inputs: Vec<Rc<ThrillerEdge>>,
     // output: Rc<ThrillerEdge>,
-    prevs: Vec<Rc<ThrillerNode>>,
-    next: Rc<ThrillerNode>,
-    access_map: AccessMap,
+    prevs: Vec<Rc<RefCell<ThrillerNode>>>,
+    next: Rc<RefCell<ThrillerNode>>,
+    access_map: Rc<AccessMap>,
+    id: usize,
 }
 
 impl Gemm {
     /// Create a new GEMM task.
     pub fn new(
-        prevs: Vec<Rc<ThrillerNode>>,
-        next: Rc<ThrillerNode>,
-        access_map: AccessMap,
+        prevs: Vec<Rc<RefCell<ThrillerNode>>>,
+        next: Rc<RefCell<ThrillerNode>>,
+        access_map: Rc<AccessMap>,
     ) -> Self {
         Gemm {
             prevs,
             next,
             access_map,
+            id: next_id(),
         }
     }
 }
@@ -66,9 +69,9 @@ impl Task for Gemm {
                 a = access_codes[0],
                 b = access_codes[1],
                 c = access_codes[2],
-                buf_a = self.prevs[0].get_name(),
-                buf_b = self.prevs[1].get_name(),
-                buf_c = self.next.get_name()
+                buf_a = self.prevs[0].borrow().get_name(),
+                buf_b = self.prevs[1].borrow().get_name(),
+                buf_c = self.next.borrow().get_name()
             )
             .as_str();
 
@@ -78,5 +81,9 @@ impl Task for Gemm {
         code += self.access_map.gen_loop_access(gemm)?.as_str();
 
         Ok(code)
+    }
+
+    fn get_name(&self) -> String {
+        format!("Gemm_{}", self.id)
     }
 }
