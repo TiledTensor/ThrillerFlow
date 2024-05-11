@@ -30,4 +30,9 @@ impl ThrillerEngine {
 
         Ok(())
     }
+
+    /// Install macro kernel for the given dataflow block.
+    pub fn install_macro_kernels(&self) -> ThrillerResult<()> {
+        todo!()
+    }
 }
