@@ -7,6 +7,7 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, AccessMap, MemoryLevel};
 
+#[derive(PartialEq)]
 /// A map relation from inputs into outputs.
 pub enum BlockType {
     /// Map: one to one
@@ -116,7 +117,9 @@ impl ThrillerBlock {
     /// Generate store code for the block outputs.
     pub(crate) fn gen_store(&self) -> ThrillerResult<String> {
         let mut code = String::new();
-
+        if self.block_type == BlockType::Reduce {
+            return Ok(code);
+        }
         // Generate store outputs.
         match self.block_type {
             BlockType::Map => match self.mem_level {

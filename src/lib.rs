@@ -8,6 +8,7 @@ mod dataflow;
 mod engine;
 mod error;
 mod id;
+mod log;
 mod task;
 mod var;
 
@@ -19,6 +20,7 @@ pub use dataflow::{
 };
 pub use engine::ThrillerEngine;
 pub use error::{ThrillerError, ThrillerResult};
+pub use log::{debug, error, info, init_logger, set_max_level, trace, warn};
 pub use task::{Gemm, Task};
 pub use var::{IterationBound, IterationVar, RegularVar, Var};
 
@@ -42,6 +44,9 @@ pub fn initialize() {
     unsafe {
         id::ID_COUNTER.get_or_init(|| id_counter);
     }
+
+    init_logger();
+    set_max_level("debug");
 }
 
 /// Return the next unique ID.

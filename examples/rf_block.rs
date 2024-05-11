@@ -88,7 +88,7 @@ fn main() {
         vec![Rc::new(out_edge)],
         MemoryLevel::Register,
         Rc::new(subgraph),
-        BlockType::Map,
+        BlockType::Reduce,
     );
 
     let code = block.emit().unwrap();

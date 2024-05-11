@@ -4,6 +4,7 @@ use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::dataflow::{ThrillerEdge, ThrillerNode, ThrillerNodeInner};
+use crate::debug;
 use crate::task::Task;
 use crate::{next_id, MemoryLevel, ThrillerResult};
 
@@ -66,7 +67,7 @@ impl ThrillerGraph {
         for node in &self.nodes {
             let ref_node = node.borrow();
             in_degrees.insert(ref_node.get_id(), (ref_node.get_in_degrees(), node));
-            println!(
+            debug!(
                 "{} have {} in_degrees.",
                 ref_node.get_id(),
                 ref_node.get_in_degrees()
@@ -91,9 +92,6 @@ impl ThrillerGraph {
             }
         }
 
-        // self.sorted_nodes = Some(sorted_nodes);
-
-        // self.sorted_nodes.as_ref().unwrap()
         sorted_nodes
     }
 }
