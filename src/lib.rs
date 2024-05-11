@@ -5,6 +5,7 @@
 mod access;
 mod buffer;
 mod dataflow;
+mod engine;
 mod error;
 mod id;
 mod task;
@@ -16,6 +17,7 @@ pub use dataflow::{
     AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
     ThrillerNodeInner,
 };
+pub use engine::ThrillerEngine;
 pub use error::{ThrillerError, ThrillerResult};
 pub use task::{Gemm, Task};
 pub use var::{IterationBound, IterationVar, RegularVar, Var};

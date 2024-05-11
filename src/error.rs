@@ -11,6 +11,8 @@ pub enum ThrillerError {
     InvalidLoadAccess,
     /// Wrong Inputs Number.
     WrongInputsNum,
+    /// Failed to perform file operation.
+    FailedFileOp,
 }
 
 /// Result type for thriller crate functions.

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::vec::Vec;
 
-use crate::dataflow::{ThrillerEdge, ThrillerNode};
+use crate::dataflow::{ThrillerEdge, ThrillerNode, ThrillerNodeInner};
 use crate::task::Task;
 use crate::{next_id, MemoryLevel, ThrillerResult};
 
@@ -107,14 +107,27 @@ impl ThrillerGraph {
 
 impl Task for ThrillerGraph {
     fn emit(&self) -> ThrillerResult<String> {
-        todo!()
-        // #[allow(unused_mut)]
-        // let mut code = String::new();
-        // // let sorted_nodes = if let Some(sorted_nodes) = &self.sorted_nodes {
-        // //     sorted_nodes
-        // // } else {
-        // //     self.topo_sort()
-        // // };
+        let mut code = String::new();
+        // let sorted_nodes = if let Some(sorted_nodes) = &self.sorted_nodes {
+        //     sorted_nodes
+        // } else {
+        //     self.topo_sort()
+        // };
+
+        let sorted_nodes = self.topo_sort();
+
+        // let mut conpute_nodes = Vec::new();
+
+        for node in sorted_nodes {
+            // match node.borrow().get_inner() {
+            //     ThrillerNodeInner::Op(op) => code += op.emit()?.as_str(),
+            //     _ => {}
+            // }
+
+            if let ThrillerNodeInner::Op(op) = node.borrow().get_inner() {
+                code += op.emit()?.as_str();
+            }
+        }
 
         // let sorted_nodes = self.topo_sort();
 
@@ -155,7 +168,7 @@ impl Task for ThrillerGraph {
         //     compute_codes.push(compute.emit());
         // }
 
-        // Ok(code)
+        Ok(code)
     }
 
     fn get_name(&self) -> String {

@@ -69,12 +69,19 @@ fn main() {
     let rb_gemm_edge_ref = Rc::new(rb_gemm_edge);
     let gemm_acc_edge_ref = Rc::new(gemm_acc_edge);
 
-    subgraph.add_nodes(vec![r_a_node.clone(), r_b_node.clone(), acc_node.clone()]);
+    subgraph.add_nodes(vec![
+        r_a_node.clone(),
+        r_b_node.clone(),
+        acc_node.clone(),
+        gemm_node.clone(),
+    ]);
     subgraph.add_edges(vec![
         ra_gemm_edge_ref.clone(),
         rb_gemm_edge_ref.clone(),
         gemm_acc_edge_ref.clone(),
     ]);
+
+    subgraph.connect();
 
     let block = ThrillerBlock::new(
         vec![Rc::new(in_edge0), Rc::new(in_edge1)],
