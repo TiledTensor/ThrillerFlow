@@ -14,7 +14,6 @@ pub struct ThrillerGraph {
     id: usize,
     nodes: Vec<Rc<RefCell<ThrillerNode>>>,
     edges: Vec<Rc<ThrillerEdge>>,
-    sorted_nodes: Option<Vec<Rc<ThrillerNode>>>,
     mem_level: MemoryLevel,
 }
 
@@ -25,7 +24,6 @@ impl ThrillerGraph {
             id: next_id(),
             nodes: Vec::new(),
             edges: Vec::new(),
-            sorted_nodes: None,
             mem_level,
         }
     }
@@ -98,75 +96,18 @@ impl ThrillerGraph {
         // self.sorted_nodes.as_ref().unwrap()
         sorted_nodes
     }
-
-    /// Get the sorted nodes of the graph.
-    pub fn get_sorted_nodes(&self) -> &Vec<Rc<ThrillerNode>> {
-        self.sorted_nodes.as_ref().unwrap()
-    }
 }
 
 impl Task for ThrillerGraph {
     fn emit(&self) -> ThrillerResult<String> {
         let mut code = String::new();
-        // let sorted_nodes = if let Some(sorted_nodes) = &self.sorted_nodes {
-        //     sorted_nodes
-        // } else {
-        //     self.topo_sort()
-        // };
-
         let sorted_nodes = self.topo_sort();
 
-        // let mut conpute_nodes = Vec::new();
-
         for node in sorted_nodes {
-            // match node.borrow().get_inner() {
-            //     ThrillerNodeInner::Op(op) => code += op.emit()?.as_str(),
-            //     _ => {}
-            // }
-
             if let ThrillerNodeInner::Op(op) = node.borrow().get_inner() {
                 code += op.emit()?.as_str();
             }
         }
-
-        // let sorted_nodes = self.topo_sort();
-
-        // let mut compute_nodes = Vec::new();
-        // let mut block_nodes = Vec::new();
-        // let mut buffer_nodes = Vec::new();
-
-        // let mut block_codes = Vec::new();
-        // let mut compute_codes = Vec::new();
-
-        // for node in sorted_nodes {
-        //     match node.borrow().get_inner() {
-        //         ThrillerNodeInner::Op(_) => compute_nodes.push(node),
-        //         ThrillerNodeInner::Block(_) => block_nodes.push(node),
-        //         ThrillerNodeInner::Buffer(_) => buffer_nodes.push(node),
-        //     }
-        // }
-
-        // for node in block_nodes {
-        //     let block = if let ThrillerNodeInner::Block(block) = node.borrow().get_inner() {
-        //         block
-        //     } else {
-        //         unreachable!()
-        //     };
-        //     let mut block_code = block.emit()?;
-        //     block_code.push_str("__syncthreads();\n");
-
-        //     block_codes.push(block_code);
-        // }
-
-        // for node in compute_nodes {
-        //     let compute = if let ThrillerNodeInner::Op(compute) = node.borrow().get_inner() {
-        //         compute
-        //     } else {
-        //         unreachable!()
-        //     };
-
-        //     compute_codes.push(compute.emit());
-        // }
 
         Ok(code)
     }
