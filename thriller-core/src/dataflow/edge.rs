@@ -10,7 +10,6 @@ use crate::dataflow::ThrillerNode;
 pub struct AttachedEdge {
     src: Rc<Buffer>,
     dst: Rc<Buffer>,
-    #[allow(dead_code)]
     access: Option<Rc<AccessMap>>,
 }
 

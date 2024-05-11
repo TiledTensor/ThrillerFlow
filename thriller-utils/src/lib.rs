@@ -1,17 +1,22 @@
-use std::vec;
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use thriller_core::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationBound, IterationVar,
-    MemoryLevel, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
+    AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer, Gemm, IterationBound,
+    IterationVar, MemoryLevel, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
+    ThrillerNodeInner,
 };
 
-fn main() {
-    initialize();
+pub fn build_gemm_rf_graph(s_a: Rc<Buffer>, s_b: Rc<Buffer>, s_c: Rc<Buffer>) -> ThrillerBlock {
     let r_a = Rc::new(Buffer::new("rA"));
     let r_b = Rc::new(Buffer::new("rB"));
 
+    let mut in_edge0 = AttachedEdge::new(s_a, r_a.clone(), None);
+    let mut in_edge1 = AttachedEdge::new(s_b, r_b.clone(), None);
+
     let acc = Rc::new(Buffer::new("acc"));
+
+    let out_edge = AttachedEdge::new(acc.clone(), s_c, None);
 
     let iter_var = Rc::new(IterationVar::new(
         "i",
@@ -28,6 +33,9 @@ fn main() {
     access_map.add_access_offset(AccessOffset(vec![0]));
 
     let access_map = Rc::new(access_map);
+
+    in_edge0.replace_access_map(access_map.clone());
+    in_edge1.replace_access_map(access_map.clone());
 
     let mut subgraph = ThrillerGraph::new(MemoryLevel::Register);
 
@@ -73,9 +81,13 @@ fn main() {
 
     subgraph.connect();
 
-    let sort_nodes = subgraph.topo_sort();
+    let block = ThrillerBlock::new(
+        vec![Rc::new(in_edge0), Rc::new(in_edge1)],
+        vec![Rc::new(out_edge)],
+        MemoryLevel::Register,
+        Rc::new(subgraph),
+        BlockType::Reduce,
+    );
 
-    for node in sort_nodes {
-        println!("Node: {:?}", node.borrow().get_node_name());
-    }
+    block
 }

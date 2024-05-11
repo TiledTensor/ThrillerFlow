@@ -62,6 +62,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06ea2b9bc92be3c2baa9334a323ebca2d6f074ff852cd1d7b11064035cd3868f"
 
 [[package]]
+name = "examples"
+version = "0.0.0"
+dependencies = [
+ "thriller_core",
+ "thriller_utils",
+]
+
+[[package]]
 name = "iana-time-zone"
 version = "0.1.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -150,11 +158,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "thriller_flow"
+name = "thriller_core"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "log",
+]
+
+[[package]]
+name = "thriller_utils"
+version = "0.1.0"
+dependencies = [
+ "thriller_core",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use thriller_flow::{
+use thriller_core::{
     initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationBound, IterationVar,
     Task, ThrillerNode, ThrillerNodeInner,
 };

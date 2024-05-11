@@ -1,6 +1,6 @@
 use std::{rc::Rc, vec};
 
-use thriller_flow::{
+use thriller_core::{
     initialize, AccessMap, AccessMatrix, AccessOffset, IterationBound, IterationVar, ThrillerError,
     ThrillerResult, Var,
 };

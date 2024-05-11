@@ -1,7 +1,7 @@
 use std::vec;
 use std::{cell::RefCell, rc::Rc};
 
-use thriller_flow::{
+use thriller_core::{
     initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer, Gemm,
     IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerEdge, ThrillerGraph,
     ThrillerNode, ThrillerNodeInner,

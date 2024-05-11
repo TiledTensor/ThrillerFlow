@@ -1,0 +1,30 @@
+[package]
+name = "examples"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+
+[dev-dependencies]
+thriller_core = { path = "../thriller-core" }
+thriller_utils = { path = "../thriller-utils" }
+
+[[example]]
+name = "topo_sort"
+path = "topo_sort.rs"
+
+[[example]]
+name = "access"
+path = "access.rs"
+
+[[example]]
+name = "gemm"
+path = "gemm.rs"
+
+[[example]]
+name = "rf_block"
+path = "rf_block.rs"
+
+[[example]]
+name = "shared_block"
+path = "shared_block.rs"
