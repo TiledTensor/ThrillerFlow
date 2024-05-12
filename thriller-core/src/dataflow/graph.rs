@@ -102,8 +102,14 @@ impl Task for ThrillerGraph {
         let sorted_nodes = self.topo_sort();
 
         for node in sorted_nodes {
-            if let ThrillerNodeInner::Op(op) = node.borrow().get_inner() {
-                code += op.emit()?.as_str();
+            match node.borrow().get_inner() {
+                ThrillerNodeInner::Op(op) => {
+                    code += op.emit()?.as_str();
+                }
+                ThrillerNodeInner::Block(block) => {
+                    code += block.emit()?.as_str();
+                }
+                _ => {}
             }
         }
 

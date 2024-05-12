@@ -1,4 +1,4 @@
-EXAMPLE 	?= rf_block
+EXAMPLE 	?= shared_block
 
 .PHONY: build test clean example
 
