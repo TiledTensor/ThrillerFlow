@@ -46,6 +46,15 @@ impl ThrillerBlock {
         }
     }
 
+    // Merge the access map of the block inputs.
+    #[allow(dead_code)]
+    pub(crate) fn merge_access_map(
+        access_0: Rc<AccessMap>,
+        access_1: Rc<AccessMap>,
+    ) -> ThrillerResult<bool> {
+        Ok(access_0 == access_1)
+    }
+
     pub(crate) fn gen_loop_load(&self) -> ThrillerResult<String> {
         let mut code = String::new();
         for edge in self.inputs.iter() {

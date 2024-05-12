@@ -71,7 +71,6 @@ impl AccessMap {
     where
         F: Fn(&AccessMap) -> ThrillerResult<String>,
     {
-        // assert_eq!(self.loop_depth, self.iter_vars.len());
         let mut code = String::new();
         let mut indent = 0;
         if self.loop_depth != self.iter_vars.len() {
@@ -110,11 +109,23 @@ impl AccessMap {
     }
 }
 
-// impl PartialEq for AccessMap {
-//     fn eq(&self, other: &Self) -> bool {
-//         self.access_pattern == other.access_pattern
-//             && self.offset == other.offset
-//             && self.loop_depth == other.loop_depth
-//             && self.access_dims == other.access_dims
-//     }
-// }
+impl PartialEq for AccessMatrix {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl PartialEq for AccessOffset {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl PartialEq for AccessMap {
+    fn eq(&self, other: &Self) -> bool {
+        self.access_matrixs == other.access_matrixs
+            && self.offset == other.offset
+            && self.loop_depth == other.loop_depth
+            && self.access_dims == other.access_dims
+    }
+}

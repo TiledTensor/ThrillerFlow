@@ -107,7 +107,18 @@ impl Task for ThrillerGraph {
                     code += op.emit()?.as_str();
                 }
                 ThrillerNodeInner::Block(block) => {
-                    code += block.emit()?.as_str();
+                    let indent = 4;
+                    let block_code = block.emit()?;
+                    let lines = block_code.lines().collect::<Vec<_>>();
+                    code += "{\n";
+                    for line in lines {
+                        code.push_str(&format!(
+                            "{indent}{line}\n",
+                            indent = " ".repeat(indent),
+                            line = line
+                        ));
+                    }
+                    code += "}\n";
                 }
                 _ => {}
             }
