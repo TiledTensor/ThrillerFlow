@@ -7,6 +7,8 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, AccessMap, MemoryLevel};
 
+use thriller_kernels::Sync;
+
 #[derive(PartialEq, Clone, Copy)]
 /// A map relation from inputs into outputs.
 pub enum BlockType {
@@ -212,21 +214,21 @@ impl ThrillerBlock {
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();
         if let Some(access_map) = &self.unified_access_map {
-            // code += &self.gen_loop_load()?;
-            // code += self.subgraph.emit()?.as_str();
-            // code += &self.gen_store()?;
-            // Ok(code)
-
             let mut inner_code = String::new();
+
             inner_code += &self.gen_loop_load()?;
+            inner_code += Sync::emit_sync().as_str();
             inner_code += self.subgraph.emit()?.as_str();
             code += access_map.gen_loop_access(inner_code)?.as_str();
+
+            code += Sync::emit_sync().as_str();
             if let Some(reduce_outputs) = self.subgraph.reduce_block_outputs() {
                 // self.outputs.extend(reduce_outputs);
                 for output in reduce_outputs {
                     code += &self.emit_store(&output)?;
                 }
             }
+
             code += &self.gen_store()?;
             Ok(code)
         } else {

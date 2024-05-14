@@ -4,5 +4,7 @@
 #![deny(missing_docs)]
 
 mod copy;
+mod sync;
 
 pub use copy::Copy;
+pub use sync::Sync;
