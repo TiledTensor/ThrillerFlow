@@ -7,7 +7,7 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, AccessMap, MemoryLevel};
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 /// A map relation from inputs into outputs.
 pub enum BlockType {
     /// Map: one to one
@@ -46,6 +46,11 @@ impl ThrillerBlock {
             id: next_id(),
             unified_access_map: None,
         }
+    }
+
+    /// Get the block type.
+    pub fn get_block_type(&self) -> BlockType {
+        self.block_type
     }
 
     /// Merge the same access maps into a unified access map.
@@ -147,8 +152,7 @@ impl ThrillerBlock {
         Ok(code)
     }
 
-    /// Generate store code for the block outputs.
-    pub(crate) fn gen_store(&self) -> ThrillerResult<String> {
+    pub(crate) fn emit_store(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
         let mut code = String::new();
         if self.block_type == BlockType::Reduce {
             return Ok(code);
@@ -157,23 +161,19 @@ impl ThrillerBlock {
         match self.block_type {
             BlockType::Map => match self.mem_level {
                 MemoryLevel::Register => {
-                    for output in &self.outputs {
-                        code.push_str(&format!(
-                            "copy_2d_tile_r2s({}, {});\n",
-                            output.get_src_name(),
-                            output.get_dst_name()
-                        ));
-                    }
+                    code.push_str(&format!(
+                        "copy_2d_tile_r2s({}, {});\n",
+                        edge.get_src_name(),
+                        edge.get_dst_name()
+                    ));
                 }
 
                 MemoryLevel::Shared => {
-                    for output in &self.outputs {
-                        code.push_str(&format!(
-                            "copy_2d_tile_s2g({}, {});\n",
-                            output.get_src_name(),
-                            output.get_dst_name()
-                        ));
-                    }
+                    code.push_str(&format!(
+                        "copy_2d_tile_s2g({}, {});\n",
+                        edge.get_src_name(),
+                        edge.get_dst_name()
+                    ));
                 }
 
                 _ => {}
@@ -184,28 +184,30 @@ impl ThrillerBlock {
         Ok(code)
     }
 
-    // #[allow(dead_code)]
-    // pub(crate) fn reduce(&self) -> Option<&Vec<Rc<Buffer>>> {
-    //     match self.block_type {
-    //         BlockType::Reduce => Some(&self.outputs),
-    //         _ => None,
-    //     }
-    // }
+    /// Generate store code for the block outputs.
+    pub(crate) fn gen_store(&self) -> ThrillerResult<String> {
+        let mut code = String::new();
+        if self.block_type == BlockType::Reduce {
+            return Ok(code);
+        }
+        for edge in self.outputs.iter() {
+            code += &self.emit_store(edge)?;
+        }
+        Ok(code)
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn reduce(&self) -> Option<&Vec<Rc<AttachedEdge>>> {
+        match self.block_type {
+            BlockType::Reduce => Some(&self.outputs),
+            _ => None,
+        }
+    }
 
     #[allow(dead_code)]
     pub(crate) fn get_mem_level(&self) -> MemoryLevel {
         self.mem_level
     }
-
-    // pub(crate) fn emit_loop(&self) -> ThrillerResult<String> {
-    //     if let Some(access_map) = &self.unified_access_map {
-    //         let mut code = String::new();
-
-    //         Ok(code)
-    //     } else {
-    //         Err(ThrillerError::MissingAccessMap)
-    //     }
-    // }
 
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();
@@ -219,6 +221,12 @@ impl ThrillerBlock {
             inner_code += &self.gen_loop_load()?;
             inner_code += self.subgraph.emit()?.as_str();
             code += access_map.gen_loop_access(inner_code)?.as_str();
+            if let Some(reduce_outputs) = self.subgraph.reduce_block_outputs() {
+                // self.outputs.extend(reduce_outputs);
+                for output in reduce_outputs {
+                    code += &self.emit_store(&output)?;
+                }
+            }
             code += &self.gen_store()?;
             Ok(code)
         } else {

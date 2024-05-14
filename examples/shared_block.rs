@@ -88,7 +88,7 @@ fn main() {
         vec![Rc::new(out_edge)],
         MemoryLevel::Shared,
         Rc::new(subgraph),
-        BlockType::Reduce,
+        BlockType::Map,
     );
 
     shared_block.merge_access_map();
