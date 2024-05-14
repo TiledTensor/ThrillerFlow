@@ -166,6 +166,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "thriller-kernels"
+version = "0.1.0"
+
+[[package]]
 name = "thriller_core"
 version = "0.1.0"
 dependencies = [

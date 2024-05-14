@@ -6,5 +6,5 @@ members = [
 
     # Internal
     "examples",
-    "tests",
+    "tests", "thriller-kernels",
 ]
