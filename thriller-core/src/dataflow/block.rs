@@ -25,6 +25,7 @@ pub struct ThrillerBlock {
     subgraph: Rc<ThrillerGraph>,
     block_type: BlockType,
     id: usize,
+    unified_access_map: Option<Rc<AccessMap>>,
 }
 
 impl ThrillerBlock {
@@ -43,28 +44,30 @@ impl ThrillerBlock {
             subgraph,
             block_type,
             id: next_id(),
+            unified_access_map: None,
         }
     }
 
-    // Merge the access map of the block inputs.
-    #[allow(dead_code)]
-    pub(crate) fn merge_access_map(
-        access_0: Rc<AccessMap>,
-        access_1: Rc<AccessMap>,
-    ) -> ThrillerResult<bool> {
-        Ok(access_0 == access_1)
+    /// Merge the same access maps into a unified access map.
+    pub fn merge_access_map(&mut self) {
+        // Iterate over the inputs and check if the access maps are the same.
+        // If they are the same, then we can merge them into a unified access map.
+
+        // TODO: Implement this function.
+        self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
     }
 
     pub(crate) fn gen_loop_load(&self) -> ThrillerResult<String> {
         let mut code = String::new();
+
         for edge in self.inputs.iter() {
             if let Some(access) = edge.get_access() {
                 // TODO: Add access pattern support for load operation.
-                let load = |access_map: &AccessMap| -> ThrillerResult<String> {
-                    self.gen_load(access_map, edge)
-                };
-
-                code += access.gen_loop_access(load)?.as_str();
+                // let load = |access_map: &AccessMap| -> ThrillerResult<String> {
+                //     self.gen_load(access_map, edge)
+                // };
+                // code += access.gen_loop_access(&[load])?.as_str();
+                code += self.gen_load(access, edge)?.as_str();
             }
         }
         Ok(code)
@@ -173,12 +176,34 @@ impl ThrillerBlock {
         self.mem_level
     }
 
+    // pub(crate) fn emit_loop(&self) -> ThrillerResult<String> {
+    //     if let Some(access_map) = &self.unified_access_map {
+    //         let mut code = String::new();
+
+    //         Ok(code)
+    //     } else {
+    //         Err(ThrillerError::MissingAccessMap)
+    //     }
+    // }
+
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();
-        code += &self.gen_loop_load()?;
-        code += self.subgraph.emit()?.as_str();
-        code += &self.gen_store()?;
-        Ok(code)
+        if let Some(access_map) = &self.unified_access_map {
+            // code += &self.gen_loop_load()?;
+            // code += self.subgraph.emit()?.as_str();
+            // code += &self.gen_store()?;
+            // Ok(code)
+
+            let mut inner_code = String::new();
+            inner_code += &self.gen_loop_load()?;
+            inner_code += self.subgraph.emit()?.as_str();
+            code += access_map.gen_loop_access(inner_code)?.as_str();
+            code += &self.gen_store()?;
+            Ok(code)
+        } else {
+            // TODO: Handle cases without an unified access map.
+            unimplemented!()
+        }
     }
 }
 

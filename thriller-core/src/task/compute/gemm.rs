@@ -78,7 +78,12 @@ impl Task for Gemm {
             Ok(code)
         };
 
-        code += self.access_map.gen_loop_access(gemm)?.as_str();
+        // code += self.access_map.gen_loop_access(&[gemm])?.as_str();
+
+        let gemm_code = gemm(&self.access_map)?;
+        // code += self.access_map.gen_loop_access(gemm_code)?.as_str();
+
+        code += gemm_code.as_str();
 
         Ok(code)
     }

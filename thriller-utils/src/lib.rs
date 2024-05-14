@@ -81,13 +81,15 @@ pub fn build_gemm_rf_graph(s_a: Rc<Buffer>, s_b: Rc<Buffer>, s_c: Rc<Buffer>) ->
 
     subgraph.connect();
 
-    let block = ThrillerBlock::new(
+    let mut block = ThrillerBlock::new(
         vec![Rc::new(in_edge0), Rc::new(in_edge1)],
         vec![Rc::new(out_edge)],
         MemoryLevel::Register,
         Rc::new(subgraph),
         BlockType::Reduce,
     );
+
+    block.merge_access_map();
 
     block
 }

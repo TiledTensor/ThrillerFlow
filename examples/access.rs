@@ -100,7 +100,9 @@ fn main() {
         Ok(code)
     };
 
-    let code = access_map.gen_loop_access(mul_add_op).unwrap();
+    let mul_add_code = mul_add_op(&access_map).unwrap();
+
+    let code = access_map.gen_loop_access(mul_add_code).unwrap();
 
     println!("{}", code);
 }

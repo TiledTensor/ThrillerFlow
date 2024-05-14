@@ -83,13 +83,15 @@ fn main() {
 
     subgraph.connect();
 
-    let shared_block = ThrillerBlock::new(
+    let mut shared_block = ThrillerBlock::new(
         vec![Rc::new(in_edge0), Rc::new(in_edge1)],
         vec![Rc::new(out_edge)],
         MemoryLevel::Shared,
         Rc::new(subgraph),
         BlockType::Reduce,
     );
+
+    shared_block.merge_access_map();
 
     let code = shared_block.emit().unwrap();
 

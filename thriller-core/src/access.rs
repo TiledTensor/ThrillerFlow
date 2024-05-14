@@ -67,9 +67,9 @@ impl AccessMap {
     }
 
     /// Generate loop based on `AccessMap` information.
-    pub fn gen_loop_access<F>(&self, op: F) -> ThrillerResult<String>
-    where
-        F: Fn(&AccessMap) -> ThrillerResult<String>,
+    pub fn gen_loop_access(&self, inner_code: String) -> ThrillerResult<String>
+// where
+        // F: Fn(&AccessMap) -> ThrillerResult<String>,
     {
         let mut code = String::new();
         let mut indent = 0;
@@ -91,8 +91,11 @@ impl AccessMap {
             indent += 4;
         }
 
-        let access_code = op(self)?;
-        let access_lines: Vec<&str> = access_code.lines().collect();
+        // let mut access_code = String::new();
+        // for f in op {
+        //     access_code.push_str(f(self)?.as_str());
+        // }
+        let access_lines: Vec<&str> = inner_code.lines().collect();
 
         access_lines.iter().for_each(|line| {
             code.push_str(
