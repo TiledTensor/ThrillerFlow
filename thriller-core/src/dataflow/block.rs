@@ -114,11 +114,32 @@ impl ThrillerBlock {
             }
 
             MemoryLevel::Shared => {
+                let access_map = edge
+                    .get_access()
+                    .as_ref()
+                    .ok_or(ThrillerError::MissingAccessMap)?;
+
+                let loop_depth = access_map.get_loop_depth();
+                if loop_depth != 1 {
+                    return Err(ThrillerError::InvalidLoadAccess);
+                }
+
+                let offsets = access_map.get_access_offsets();
+                let matrixs = access_map.get_access_matrixs();
+
+                let iter_vars = access_map.get_iter_vars();
+
                 code.push_str(&format!(
-                    "copy_2d_tile_g2s({}, {});\n",
-                    edge.get_src_name(),
-                    edge.get_dst_name()
-                ));
+                        "copy_2d_tile_g2s({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
+                        src = edge.get_src_name(),
+                        src_access = matrixs[0].0[0][0],
+                        src_offset = offsets[0].0[0],
+                        src_index = iter_vars[0].get_name(),
+                        dst = edge.get_dst_name(),
+                        dst_index = iter_vars[0].get_name(),
+                        dst_offset = offsets[1].0[0],
+                        dst_access = matrixs[1].0[0][0]
+                    ));
             }
 
             _ => {}
