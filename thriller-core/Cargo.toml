@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 log = "0.4"
 chrono = "0.4"
+"thriller-kernels" = { path = "../thriller-kernels" }

@@ -175,6 +175,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "log",
+ "thriller-kernels",
 ]
 
 [[package]]

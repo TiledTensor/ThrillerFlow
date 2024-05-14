@@ -3,8 +3,9 @@ resolver = "2"
 members = [
     "thriller-core",
     "thriller-utils",
+    "thriller-kernels",
 
     # Internal
     "examples",
-    "tests", "thriller-kernels",
+    "tests",
 ]
