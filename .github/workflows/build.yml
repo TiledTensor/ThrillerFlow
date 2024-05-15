@@ -38,6 +38,6 @@ jobs:
                   toolchain: ${{ matrix.rust-toolchain }}
                   components: rust-src
                   override: true
-            - name: Build
+            - name: Build the project
               run: cargo build
 

@@ -1,0 +1,22 @@
+name: Build CI
+
+on: [push, pull_request]
+
+jobs:
+    examples:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                rust-toolchain: [stable]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install Rust
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: ${{ matrix.rust-toolchain }}
+                  components: rust-src
+                  override: true
+            - name: Run examples
+              run: ./scripts/run_examples.sh
+
