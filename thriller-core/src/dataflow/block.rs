@@ -218,6 +218,9 @@ impl ThrillerBlock {
 
             inner_code += &self.gen_loop_load()?;
             inner_code += Sync::emit_sync().as_str();
+            if self.mem_level == MemoryLevel::Shared {
+                inner_code += Sync::emit_copy_async().as_str();
+            }
             inner_code += self.subgraph.emit()?.as_str();
             code += access_map.gen_loop_access(inner_code)?.as_str();
 

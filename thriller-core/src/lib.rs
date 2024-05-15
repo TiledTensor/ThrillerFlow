@@ -27,7 +27,7 @@ pub use var::{IterationBound, IterationVar, RegularVar, Var};
 use id::ID_COUNTER;
 
 /// GPU Memory Level.
-#[derive(Default, Clone, Copy)]
+#[derive(Default, Clone, Copy, PartialEq)]
 pub enum MemoryLevel {
     /// Register File
     #[default]
