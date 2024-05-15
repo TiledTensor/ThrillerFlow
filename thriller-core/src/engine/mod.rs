@@ -3,7 +3,7 @@ use std::io::Write;
 use std::process::Command;
 use std::{env::temp_dir, fs::File};
 
-use crate::{ThrillerBlock, ThrillerError, ThrillerResult};
+use crate::{Task, ThrillerBlock, ThrillerError, ThrillerResult};
 
 /// `ThrillerEngine` is the main entry point for the ThrillerFlow framework.
 pub struct ThrillerEngine {
@@ -16,10 +16,27 @@ impl ThrillerEngine {
         ThrillerEngine { dataflow_block }
     }
 
+    /// Emit the function signature for the given dataflow block.
+    pub(crate) fn emit_function_signature(&self) -> ThrillerResult<String> {
+        todo!()
+    }
+
     /// Generate the ThrillerFlow code for the given dataflow block.
     pub fn dataflow_generate(&self) -> ThrillerResult<String> {
         let mut code = String::new();
-        code += self.dataflow_block.gen_loop_load()?.as_str();
+        code += self.emit_function_signature()?.as_str();
+        code += "{\n";
+        let dataflow_code = self.dataflow_block.emit()?;
+        let lines = dataflow_code.lines().collect::<Vec<_>>();
+        let indient = 4;
+        for line in lines {
+            code.push_str(&format!(
+                "{indent}{line}\n",
+                indent = " ".repeat(indient),
+                line = line
+            ));
+        }
+        code += "}\n";
         Ok(code)
     }
 
