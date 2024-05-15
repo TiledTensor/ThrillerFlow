@@ -28,3 +28,7 @@ path = "rf_block.rs"
 [[example]]
 name = "shared_block"
 path = "shared_block.rs"
+
+[[example]]
+name = "global_block"
+path = "global_block.rs"

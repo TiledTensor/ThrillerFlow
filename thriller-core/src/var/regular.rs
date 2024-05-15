@@ -1,9 +1,19 @@
-use crate::Var;
+use crate::{next_id, Var};
 
 /// A regular variable.
 pub struct RegularVar {
     name: String,
     id: usize,
+}
+
+impl RegularVar {
+    /// Create a new regular variable.
+    pub fn new(name: String) -> Self {
+        RegularVar {
+            name,
+            id: next_id(),
+        }
+    }
 }
 
 impl Var for RegularVar {

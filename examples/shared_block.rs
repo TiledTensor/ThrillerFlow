@@ -6,7 +6,7 @@ use thriller_core::{
     IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerEdge, ThrillerGraph,
     ThrillerNode, ThrillerNodeInner,
 };
-use thriller_utils::*;
+use thriller_utils::ThrillerUtils;
 
 fn main() {
     initialize();
@@ -38,7 +38,7 @@ fn main() {
     let in_edge1 = AttachedEdge::new(g_b.clone(), s_b.clone(), Some(access_map.clone()));
     let out_edge = AttachedEdge::new(g_c.clone(), s_c.clone(), None);
 
-    let rf_gemm_graph = build_gemm_rf_graph(s_a.clone(), s_b.clone(), s_c.clone());
+    let rf_gemm_graph = ThrillerUtils::build_gemm_rf_block(s_a.clone(), s_b.clone(), s_c.clone());
 
     // let rf_code = rf_gemm_graph.emit().unwrap();
 

@@ -236,7 +236,12 @@ impl ThrillerBlock {
             Ok(code)
         } else {
             // TODO: Handle cases without an unified access map.
-            unimplemented!()
+            if self.inputs.is_empty() && self.outputs.is_empty() {
+                let code = self.subgraph.emit()?;
+                Ok(code)
+            } else {
+                unimplemented!();
+            }
         }
     }
 }
