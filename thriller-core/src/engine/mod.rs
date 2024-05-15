@@ -61,6 +61,7 @@ impl ThrillerEngine {
     pub fn emit_dataflow<T: AsRef<str>>(&self, sig: T) -> ThrillerResult<String> {
         let mut code = String::new();
         code += self.emit_function_signature(sig)?.as_str();
+
         code += "{\n";
         code += "// Declare shared memory buffer\n";
         code += Memory::emit_shared_buf_decl().as_str();

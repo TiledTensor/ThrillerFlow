@@ -1,4 +1,4 @@
-EXAMPLE 	?= shared_block
+EXAMPLE 	?= global_block
 
 .PHONY: build test clean example
 

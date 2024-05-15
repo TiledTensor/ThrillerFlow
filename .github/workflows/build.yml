@@ -1,0 +1,25 @@
+name: Build CI
+
+on: [push, pull_request]
+
+jobs:
+    clippy:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                rust-toolchain: [stable]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install Rust
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: ${{ matrix.rust-toolchain }}
+                  components: clippy, rust-src, rustfmt
+                  override: true
+            - name: Check rust version
+              run: rustc --version --verbose
+            - name: Run Clippy
+              run: cargo clippy --all-targets --all-features -- -D warnings
+            - name: Check code formatting
+              run: cargo fmt --all -- --check
