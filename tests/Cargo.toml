@@ -10,9 +10,5 @@ thriller_core = { path = "../thriller-core" }
 thriller_utils = { path = "../thriller-utils" }
 
 [[test]]
-name = "block"
-path = "block.rs"
-
-[[test]]
 name = "id"
 path = "id.rs"

@@ -1,4 +1,4 @@
-name: Run Example CI
+name: Run Test CI
 
 on: [push, pull_request]
 
@@ -17,6 +17,6 @@ jobs:
                   toolchain: ${{ matrix.rust-toolchain }}
                   components: rust-src
                   override: true
-            - name: Run examples
-              run: ./scripts/run_examples.sh
+            - name: Check all tests
+              run: make test
 
