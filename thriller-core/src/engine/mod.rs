@@ -4,6 +4,8 @@ use std::process::Command;
 use std::rc::Rc;
 use std::{env::temp_dir, fs::File};
 
+use thriller_kernels::Memory;
+
 use crate::{RegularVar, Task, ThrillerBlock, ThrillerError, ThrillerResult, Var};
 
 /// `ThrillerEngine` is the main entry point for the ThrillerFlow framework.
@@ -60,16 +62,12 @@ impl ThrillerEngine {
         let mut code = String::new();
         code += self.emit_function_signature(sig)?.as_str();
         code += "{\n";
-        let dataflow_code = self.dataflow_block.emit()?;
-        let lines = dataflow_code.lines().collect::<Vec<_>>();
-        let indient = 4;
-        for line in lines {
-            code.push_str(&format!(
-                "{indent}{line}\n",
-                indent = " ".repeat(indient),
-                line = line
-            ));
-        }
+        code += "// Declare shared memory buffer\n";
+        code += Memory::emit_shared_buf_decl().as_str();
+        code += "\n";
+
+        code += "// Emit dataflow code.\n";
+        code += self.dataflow_block.emit()?.as_str();
         code += "}\n";
         Ok(code)
     }
