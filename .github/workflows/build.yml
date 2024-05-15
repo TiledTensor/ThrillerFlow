@@ -23,3 +23,21 @@ jobs:
               run: cargo clippy --all-targets --all-features -- -D warnings
             - name: Check code formatting
               run: cargo fmt --all -- --check
+    
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                rust-toolchain: [stable]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install Rust
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: ${{ matrix.rust-toolchain }}
+                  components: rust-src
+                  override: true
+            - name: Build
+              run: cargo build
+
