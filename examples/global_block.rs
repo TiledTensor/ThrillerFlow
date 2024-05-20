@@ -47,4 +47,10 @@ fn main() {
     let code = engine.emit_dataflow("thriller_gemm").unwrap();
 
     println!("{}", code);
+
+    // let path = engine.install_library().unwrap();
+    // println!("Library installed at: {}", path);
+
+    let repo_dir = engine.install_library().unwrap();
+    println!("Library installed at: {}", repo_dir);
 }

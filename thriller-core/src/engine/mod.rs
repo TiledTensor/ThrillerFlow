@@ -1,12 +1,16 @@
-use std::fs;
+use std::env::current_dir;
+use std::fs::File;
 use std::io::Write;
 use std::process::Command;
 use std::rc::Rc;
-use std::{env::temp_dir, fs::File};
 
 use thriller_kernels::Memory;
 
 use crate::{RegularVar, Task, ThrillerBlock, ThrillerError, ThrillerResult, Var};
+
+mod layout;
+
+pub use layout::LayoutConfig;
 
 /// `ThrillerEngine` is the main entry point for the ThrillerFlow framework.
 pub struct ThrillerEngine {
@@ -85,33 +89,40 @@ impl ThrillerEngine {
     }
 
     /// Install macro kernel for the given dataflow block.
-    pub fn install_library(&self) -> ThrillerResult<()> {
-        let temp_dir = temp_dir().join("thriller");
-        fs::create_dir(temp_dir.clone()).map_err(|_| ThrillerError::FailedFileOp)?;
-
+    pub fn install_library(&self) -> ThrillerResult<String> {
+        let temp_dir = current_dir().unwrap();
         std::env::set_current_dir(&temp_dir).map_err(|_| ThrillerError::FailedFileOp)?;
 
-        let clone = Command::new("git")
-            .args(["clone", "git@github.com:TiledTensor/TiledCUDA.git"])
-            .output()
-            .map_err(|_| ThrillerError::FailedFileOp)?;
-
-        if !clone.status.success() {
-            return Err(ThrillerError::FailedFileOp);
-        }
-
         let repo_dir = temp_dir.join("TiledCUDA");
-        std::env::set_current_dir(repo_dir).map_err(|_| ThrillerError::FailedFileOp)?;
 
-        let submodule = Command::new("git")
-            .args(["submodule", "update", "--init", "--recursive"])
-            .output()
-            .map_err(|_| ThrillerError::FailedFileOp)?;
+        if !repo_dir.exists() {
+            let clone = Command::new("git")
+                .args(["clone", "git@github.com:TiledTensor/TiledCUDA.git"])
+                .output()
+                .map_err(|_| ThrillerError::FailedFileOp)?;
 
-        if !submodule.status.success() {
-            return Err(ThrillerError::FailedFileOp);
+            if !clone.status.success() {
+                return Err(ThrillerError::FailedFileOp);
+            }
+
+            std::env::set_current_dir(repo_dir.clone()).map_err(|_| ThrillerError::FailedFileOp)?;
+
+            let submodule = Command::new("git")
+                .args(["submodule", "update", "--init", "--recursive"])
+                .output()
+                .map_err(|_| ThrillerError::FailedFileOp)?;
+
+            if !submodule.status.success() {
+                return Err(ThrillerError::FailedFileOp);
+            }
         }
 
-        Ok(())
+        let repo_path = repo_dir
+            .as_path()
+            .to_str()
+            .map(|s| s.to_string())
+            .ok_or(ThrillerError::FailedFileOp)?;
+
+        Ok(repo_path)
     }
 }

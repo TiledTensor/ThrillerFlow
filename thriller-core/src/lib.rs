@@ -18,7 +18,7 @@ pub use dataflow::{
     AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
     ThrillerNodeInner,
 };
-pub use engine::ThrillerEngine;
+pub use engine::{LayoutConfig, ThrillerEngine};
 pub use error::{ThrillerError, ThrillerResult};
 pub use log::{debug, error, info, init_logger, set_max_level, trace, warn};
 pub use task::{Gemm, Task};
