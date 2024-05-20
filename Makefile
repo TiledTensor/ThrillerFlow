@@ -1,4 +1,4 @@
-EXAMPLE 	?= global_block
+EXAMPLE 	?= engine
 
 .PHONY: build test clean example
 

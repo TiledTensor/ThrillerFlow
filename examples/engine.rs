@@ -44,7 +44,13 @@ fn main() {
     engine.add_inputs(vec![var_a.clone(), var_b.clone()]);
     engine.add_outputs(vec![var_c.clone()]);
 
-    let code = engine.emit_dataflow("thriller_gemm").unwrap();
+    let repo_dir = engine.install_library().unwrap();
+    println!("Library installed at: {}", repo_dir);
 
-    println!("{}", code);
+    engine
+        .persist(
+            format!("{}/{}", repo_dir, "include/kernels/thriller_gemm.hpp"),
+            "thriller_gemm".to_string(),
+        )
+        .unwrap();
 }

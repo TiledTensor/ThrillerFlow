@@ -1,6 +1,7 @@
 use std::env::current_dir;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 use std::process::Command;
 use std::rc::Rc;
 
@@ -61,6 +62,16 @@ impl ThrillerEngine {
         Ok(code)
     }
 
+    /// Emit include headers for the dataflow code.
+    pub fn emit_header(&self) -> ThrillerResult<String> {
+        let mut code = String::new();
+        code += "#pragma once\n";
+        code += "#include \"cuda_utils.hpp\"\n";
+        code += "#include <torch/script.h>\n";
+        code += "\n\n";
+        Ok(code)
+    }
+
     /// Generate the ThrillerFlow code for the given dataflow block.
     pub fn emit_dataflow<T: AsRef<str>>(&self, sig: T) -> ThrillerResult<String> {
         let mut code = String::new();
@@ -78,8 +89,13 @@ impl ThrillerEngine {
     }
 
     /// Persist the generated ThrillerFlow code to the given file.
-    pub fn persist<T: AsRef<str>>(&self, file_name: &str, sig: T) -> ThrillerResult<()> {
-        let code = self.emit_dataflow(sig)?;
+    pub fn persist<T: AsRef<str>>(&self, file_name: T, sig: T) -> ThrillerResult<()> {
+        let mut code = self.emit_header()?;
+        code += "namespace tiledcuda::kernels {\n\n";
+        code += self.emit_dataflow(sig)?.as_str();
+        code += "\n}  // namespace tiledcuda::kernels\n";
+
+        let file_name = Path::new(file_name.as_ref());
         let mut file = File::create(file_name).unwrap();
         // file.write_all(code.as_bytes()).unwrap();
         file.write_all(code.as_bytes())
