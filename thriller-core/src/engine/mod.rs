@@ -5,7 +5,8 @@ use std::path::Path;
 use std::process::Command;
 use std::rc::Rc;
 
-use thriller_kernels::Memory;
+// use thriller_kernels::Memory;
+use crate::kernels::memory::Memory;
 
 use crate::{RegularVar, Task, ThrillerBlock, ThrillerError, ThrillerResult, Var};
 
@@ -65,9 +66,11 @@ impl ThrillerEngine {
     /// Emit include headers for the dataflow code.
     pub fn emit_header(&self) -> ThrillerResult<String> {
         let mut code = String::new();
-        code += "#pragma once\n";
-        code += "#include \"cuda_utils.hpp\"\n";
-        code += "#include <torch/script.h>\n";
+        // code += "#pragma once\n";
+        // code += "#include \"cuda_utils.hpp\"\n";
+        // code += "#include <torch/script.h>\n";
+        code += "#include \"cell/mod.hpp\"\n";
+        code += "#include \"layout.hpp\"\n";
         code += "\n\n";
         Ok(code)
     }

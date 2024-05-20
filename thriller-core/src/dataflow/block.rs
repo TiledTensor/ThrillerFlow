@@ -7,7 +7,8 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, AccessMap, MemoryLevel};
 
-use thriller_kernels::Sync;
+// use thriller_kernels::Sync;
+use crate::kernels::sync::Sync;
 
 #[derive(PartialEq, Clone, Copy)]
 /// A map relation from inputs into outputs.

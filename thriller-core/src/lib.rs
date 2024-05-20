@@ -8,6 +8,7 @@ mod dataflow;
 mod engine;
 mod error;
 mod id;
+mod kernels;
 mod log;
 mod task;
 mod var;

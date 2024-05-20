@@ -49,7 +49,7 @@ fn main() {
 
     engine
         .persist(
-            format!("{}/{}", repo_dir, "include/kernels/thriller_gemm.hpp"),
+            format!("{}/{}", repo_dir, "src/kernels/thriller_gemm.cu"),
             "thriller_gemm".to_string(),
         )
         .unwrap();
