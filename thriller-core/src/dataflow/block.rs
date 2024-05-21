@@ -51,6 +51,23 @@ impl ThrillerBlock {
         }
     }
 
+    // pub(crate) fn get_inputs(&self) -> &[Rc<AttachedEdge>] {
+    //     &self.inputs
+    // }
+
+    // pub(crate) fn get_inner_bufs(&self) -> Vec<String> {
+    //     // Iterate through the inputs and collect all dst buffers.
+    //     let mut bufs = Vec::new();
+    //     for input in self.inputs.iter() {
+    //         // if let Some(buf) = input.get_dst() {
+    //         //     bufs.push(buf.clone());
+    //         // }
+    //         let dst_buf = input.get_dst_name().clone();
+    //         bufs.push(dst_buf);
+    //     }
+    //     bufs
+    // }
+
     /// Get the block type.
     pub fn get_block_type(&self) -> BlockType {
         self.block_type

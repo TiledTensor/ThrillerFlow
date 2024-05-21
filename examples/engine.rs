@@ -1,8 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
-    initialize, BlockType, Buffer, MemoryLevel, RegularVar, ThrillerBlock, ThrillerEngine,
-    ThrillerGraph, ThrillerNode, ThrillerNodeInner,
+    initialize, BlockLayout, BlockShape, BlockType, Buffer, MemoryLevel, RegularVar, ThrillerBlock,
+    ThrillerEngine, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 use thriller_utils::ThrillerUtils;
 
@@ -41,8 +41,21 @@ fn main() {
     let var_b = Rc::new(RegularVar::new(String::from("B")));
     let var_c = Rc::new(RegularVar::new(String::from("C")));
 
+    let block_layout_a = Rc::new(BlockLayout::new([
+        BlockShape::Num(1),
+        BlockShape::Num(1),
+        BlockShape::Num(1),
+    ]));
+
+    let block_layout_b = Rc::new(BlockLayout::new([
+        BlockShape::Num(1),
+        BlockShape::Num(1),
+        BlockShape::Num(1),
+    ]));
+
     engine.add_inputs(vec![var_a.clone(), var_b.clone()]);
     engine.add_outputs(vec![var_c.clone()]);
+    engine.add_input_blocks(vec![block_layout_a, block_layout_b]);
 
     let repo_dir = engine.install_library().unwrap();
     println!("Library installed at: {}", repo_dir);
