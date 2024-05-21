@@ -17,8 +17,9 @@ pub use layout::{BlockLayout, BlockShape};
 pub struct ThrillerEngine {
     dataflow_block: ThrillerBlock,
     inputs: Vec<(Rc<RegularVar>, Rc<Buffer>)>,
-    outputs: Vec<Rc<RegularVar>>,
+    outputs: Vec<(Rc<RegularVar>, Rc<Buffer>)>,
     input_blocks: Vec<Rc<BlockLayout>>,
+    output_blocks: Vec<Rc<BlockLayout>>,
 }
 
 impl ThrillerEngine {
@@ -29,6 +30,7 @@ impl ThrillerEngine {
             inputs: vec![],
             outputs: vec![],
             input_blocks: vec![],
+            output_blocks: vec![],
         }
     }
 
@@ -38,13 +40,18 @@ impl ThrillerEngine {
     }
 
     /// Add outputs into the ThrillerEngine.
-    pub fn add_outputs(&mut self, outputs: Vec<Rc<RegularVar>>) {
+    pub fn add_outputs(&mut self, outputs: Vec<(Rc<RegularVar>, Rc<Buffer>)>) {
         self.outputs.extend(outputs);
     }
 
     /// Add input blocks into the ThrillerEngine.
     pub fn add_input_blocks(&mut self, input_blocks: Vec<Rc<BlockLayout>>) {
         self.input_blocks.extend(input_blocks);
+    }
+
+    /// Add output blocks into the ThrillerEngine.
+    pub fn add_output_blocks(&mut self, output_blocks: Vec<Rc<BlockLayout>>) {
+        self.output_blocks.extend(output_blocks);
     }
 
     /// Emit the function signature for the given dataflow block.
@@ -61,7 +68,7 @@ impl ThrillerEngine {
             }
         }
 
-        for output in &self.outputs {
+        for (output, _) in &self.outputs {
             code += format!(", Element* {}", output.get_name()).as_str();
         }
         code += ")";
@@ -70,7 +77,7 @@ impl ThrillerEngine {
     }
 
     /// Emit include headers for the dataflow code.
-    pub fn emit_header(&self) -> ThrillerResult<String> {
+    pub(crate) fn emit_header(&self) -> ThrillerResult<String> {
         let mut code = String::new();
         // code += "#pragma once\n";
         // code += "#include \"cuda_utils.hpp\"\n";
@@ -78,6 +85,15 @@ impl ThrillerEngine {
         code += "#include \"cell/mod.hpp\"\n";
         code += "#include \"layout.hpp\"\n";
         code += "\n\n";
+        Ok(code)
+    }
+
+    pub(crate) fn emit_initialize(&self) -> ThrillerResult<String> {
+        let mut code = String::new();
+
+        code += "typename Ketraits::TiledMma mma;\n";
+        code += "typename Ketraits::TiledCopy tiled_copy;\n";
+
         Ok(code)
     }
 
@@ -91,14 +107,11 @@ impl ThrillerEngine {
         code += Memory::emit_shared_buf_decl().as_str();
         code += "\n";
 
-        // println!("Inner buffers: {:?}", self.dataflow_block.get_inner_bufs());
-
         // Add block layouts mappings
         assert!(self.input_blocks.len() == self.inputs.len());
-        // assert!(self.dataflow_block.get_inner_bufs().len() == self.inputs.len());
+        assert!(self.output_blocks.len() == self.outputs.len());
 
         for ((var, buf), input_block) in self.inputs.iter().zip(self.input_blocks.iter()) {
-            // code += format!("auto {} = {};", input.get_name(), input_block.get_name()).as_str();
             code += format!(
                 "Element* {} = const_cast<Element*>({}) + blockIdx.x * {} + blockIdx.y * {} + blockIdx.z * {};\n",
                 buf.get_name(),
@@ -109,6 +122,23 @@ impl ThrillerEngine {
             )
             .as_str();
         }
+
+        for ((var, buf), output_block) in self.outputs.iter().zip(self.input_blocks.iter()) {
+            // code += format!("auto {} = {};", input.get_name(), input_block.get_name()).as_str();
+            code += format!(
+                "Element* {} = const_cast<Element*>({}) + blockIdx.x * {} + blockIdx.y * {} + blockIdx.z * {};\n",
+                buf.get_name(),
+                var.get_name(),
+                output_block.get_dim_x(),
+                output_block.get_dim_y(),
+                output_block.get_dim_z()
+            )
+            .as_str();
+        }
+
+        code += "\n";
+        code += self.emit_initialize()?.as_str();
+        code += "\n";
 
         code += "// Emit dataflow code.\n";
         code += self.dataflow_block.emit()?.as_str();

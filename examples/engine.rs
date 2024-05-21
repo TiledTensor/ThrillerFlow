@@ -53,12 +53,23 @@ fn main() {
         BlockShape::Num(1),
     ]));
 
+    let block_layout_c = Rc::new(BlockLayout::new([
+        BlockShape::Num(1),
+        BlockShape::Num(1),
+        BlockShape::Num(1),
+    ]));
+
     engine.add_inputs(vec![
         (var_a.clone(), g_a.clone()),
         (var_b.clone(), g_b.clone()),
     ]);
-    engine.add_outputs(vec![var_c.clone()]);
+    engine.add_outputs(vec![(var_c.clone(), g_c.clone())]);
+
     engine.add_input_blocks(vec![block_layout_a, block_layout_b]);
+    engine.add_output_blocks(vec![block_layout_c]);
+
+    let code = engine.emit_dataflow("thriller_gemm").unwrap();
+    println!("{}", code);
 
     let repo_dir = engine.install_library().unwrap();
     println!("Library installed at: {}", repo_dir);
