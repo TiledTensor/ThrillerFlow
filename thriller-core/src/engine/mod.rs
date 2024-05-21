@@ -5,10 +5,9 @@ use std::path::Path;
 use std::process::Command;
 use std::rc::Rc;
 
-// use thriller_kernels::Memory;
 use crate::kernels::memory::Memory;
 
-use crate::{RegularVar, Task, ThrillerBlock, ThrillerError, ThrillerResult, Var};
+use crate::{Buffer, RegularVar, Task, ThrillerBlock, ThrillerError, ThrillerResult, Var};
 
 mod layout;
 
@@ -17,7 +16,7 @@ pub use layout::{BlockLayout, BlockShape};
 /// `ThrillerEngine` is the main entry point for the ThrillerFlow framework.
 pub struct ThrillerEngine {
     dataflow_block: ThrillerBlock,
-    inputs: Vec<Rc<RegularVar>>,
+    inputs: Vec<(Rc<RegularVar>, Rc<Buffer>)>,
     outputs: Vec<Rc<RegularVar>>,
     input_blocks: Vec<Rc<BlockLayout>>,
 }
@@ -34,7 +33,7 @@ impl ThrillerEngine {
     }
 
     /// Add inputs into the ThrillerEngine.
-    pub fn add_inputs(&mut self, inputs: Vec<Rc<RegularVar>>) {
+    pub fn add_inputs(&mut self, inputs: Vec<(Rc<RegularVar>, Rc<Buffer>)>) {
         self.inputs.extend(inputs);
     }
 
@@ -54,11 +53,11 @@ impl ThrillerEngine {
         code += "template<typename Element, typename KeTraits>\n";
         code += format!("__global__ void {}(", sig.as_ref()).as_str();
         // TODO: Add function arguments.
-        for (index, input) in self.inputs.iter().enumerate() {
+        for (index, (var, _)) in self.inputs.iter().enumerate() {
             if index != 0 {
-                code += format!(", const Element* {}", input.get_name()).as_str();
+                code += format!(", const Element* {}", var.get_name()).as_str();
             } else {
-                code += format!("const Element* {}", input.get_name()).as_str();
+                code += format!("const Element* {}", var.get_name()).as_str();
             }
         }
 
@@ -98,12 +97,12 @@ impl ThrillerEngine {
         assert!(self.input_blocks.len() == self.inputs.len());
         // assert!(self.dataflow_block.get_inner_bufs().len() == self.inputs.len());
 
-        for (input, input_block) in self.inputs.iter().zip(self.input_blocks.iter()) {
+        for ((var, buf), input_block) in self.inputs.iter().zip(self.input_blocks.iter()) {
             // code += format!("auto {} = {};", input.get_name(), input_block.get_name()).as_str();
             code += format!(
                 "Element* {} = const_cast<Element*>({}) + blockIdx.x * {} + blockIdx.y * {} + blockIdx.z * {};\n",
-                "todo",
-                input.get_name(),
+                buf.get_name(),
+                var.get_name(),
                 input_block.get_dim_x(),
                 input_block.get_dim_y(),
                 input_block.get_dim_z()

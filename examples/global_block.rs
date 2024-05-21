@@ -53,7 +53,10 @@ fn main() {
         BlockShape::Num(1),
     ]));
 
-    engine.add_inputs(vec![var_a.clone(), var_b.clone()]);
+    engine.add_inputs(vec![
+        (var_a.clone(), g_a.clone()),
+        (var_b.clone(), g_b.clone()),
+    ]);
     engine.add_outputs(vec![var_c.clone()]);
     engine.add_input_blocks(vec![block_layout_a, block_layout_b]);
 

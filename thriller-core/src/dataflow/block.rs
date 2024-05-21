@@ -167,7 +167,9 @@ impl ThrillerBlock {
                     ));
             }
 
-            _ => {}
+            MemoryLevel::Global => {
+                unimplemented!();
+            }
         }
         Ok(code)
     }
