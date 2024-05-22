@@ -1,0 +1,12 @@
+[package]
+name = "thriller-bindings"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "thriller_flow"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.21.2", features = ["extension-module"] }
+thriller_core = { path = "../thriller-core" }
