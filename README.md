@@ -22,3 +22,15 @@ make test
 ```
 make example
 ```
+
+## Usage
+
+Add the following lines to your Cargo.toml:
+
+```toml
+[dependencies]
+thriller_flow = { git = "https://github.com/TiledTensor/ThrillerFlow.git" }
+```
+
+## License
+MIT License
