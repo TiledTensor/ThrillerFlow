@@ -17,7 +17,13 @@ impl Buffer {
         }
     }
 
-    pub(crate) fn get_name(&self) -> &String {
+    /// Get Buffer name.
+    pub fn get_name(&self) -> &String {
         &self.name
+    }
+
+    /// Get Buffer id.
+    pub fn get_id(&self) -> usize {
+        self.id
     }
 }

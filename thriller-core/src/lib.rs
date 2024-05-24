@@ -1,4 +1,4 @@
-//! ThrillerFlow is a DataFlow Analyise and Codegen Framework written in Rust.
+//! A DataFlow Analyise and Codegen Framework written in Rust.
 
 #![deny(warnings)]
 #![deny(missing_docs)]
