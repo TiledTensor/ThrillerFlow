@@ -32,7 +32,7 @@ pub struct ThrillerBlock {
 }
 
 impl ThrillerBlock {
-    /// Create a new ThrillerBlock with the given inputs, outputs, memory level, subgraph, and block type.
+    /// Create a new [`ThrillerBlock`] with the given inputs, outputs, memory level, subgraph, and block type.
     pub fn new(
         inputs: Vec<Rc<AttachedEdge>>,
         outputs: Vec<Rc<AttachedEdge>>,
@@ -51,23 +51,6 @@ impl ThrillerBlock {
         }
     }
 
-    // pub(crate) fn get_inputs(&self) -> &[Rc<AttachedEdge>] {
-    //     &self.inputs
-    // }
-
-    // pub(crate) fn get_inner_bufs(&self) -> Vec<String> {
-    //     // Iterate through the inputs and collect all dst buffers.
-    //     let mut bufs = Vec::new();
-    //     for input in self.inputs.iter() {
-    //         // if let Some(buf) = input.get_dst() {
-    //         //     bufs.push(buf.clone());
-    //         // }
-    //         let dst_buf = input.get_dst_name().clone();
-    //         bufs.push(dst_buf);
-    //     }
-    //     bufs
-    // }
-
     /// Get the block type.
     pub fn get_block_type(&self) -> BlockType {
         self.block_type
@@ -79,7 +62,19 @@ impl ThrillerBlock {
         // If they are the same, then we can merge them into a unified access map.
 
         // TODO: Implement this function.
+        self.inputs.windows(2).for_each(|window| {
+            let (first, second) = (&window[0], &window[1]);
+            assert!(
+                first.get_access() == second.get_access(),
+                "Access maps are not the same."
+            );
+        });
+
         self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
+    }
+
+    pub(crate) fn get_inputs(&self) -> &Vec<Rc<AttachedEdge>> {
+        &self.inputs
     }
 
     pub(crate) fn gen_loop_load(&self) -> ThrillerResult<String> {

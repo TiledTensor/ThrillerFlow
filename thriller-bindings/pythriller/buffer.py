@@ -1,5 +1,4 @@
-import thriller_flow
-from thriller_flow import PyBuffer
+from .context import PyBuffer
 
 
 def create_buffer(name):
