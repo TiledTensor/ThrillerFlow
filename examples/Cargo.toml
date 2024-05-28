@@ -23,15 +23,15 @@ path = "gemm.rs"
 
 [[example]]
 name = "rf_block"
-path = "rf_block.rs"
+path = "gemm/rf_block.rs"
 
 [[example]]
 name = "shared_block"
-path = "shared_block.rs"
+path = "gemm/shared_block.rs"
 
 [[example]]
 name = "global_block"
-path = "global_block.rs"
+path = "gemm/global_block.rs"
 
 [[example]]
 name = "engine"
