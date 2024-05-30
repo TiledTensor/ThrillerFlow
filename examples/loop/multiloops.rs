@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use thriller_core::{
     initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer,
-    IterationBound, IterationVar, MemoryLevel, ThrillerBlock, ThrillerGraph,
+    IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerGraph,
 };
 
 fn main() {
@@ -45,13 +45,14 @@ fn main() {
     let s_b = Rc::new(Buffer::new("sB"));
     let r_b = Rc::new(Buffer::new("rB"));
 
-    let in_edge0 = AttachedEdge::new(s_a, r_a.clone(), Some(access_map1.clone()));
-    let in_edge1 = AttachedEdge::new(s_b, r_b.clone(), Some(access_map2.clone()));
+    let in_edge0 = AttachedEdge::new(s_a.clone(), r_a.clone(), Some(access_map1.clone()));
+    let in_edge1 = AttachedEdge::new(s_b.clone(), r_b.clone(), Some(access_map2.clone()));
+    let in_edge2 = AttachedEdge::new(s_a.clone(), r_b.clone(), Some(access_map1.clone()));
 
     let subgraph = ThrillerGraph::new(MemoryLevel::Register);
 
     let mut block = ThrillerBlock::new(
-        vec![Rc::new(in_edge0), Rc::new(in_edge1)],
+        vec![Rc::new(in_edge0), Rc::new(in_edge1), Rc::new(in_edge2)],
         vec![],
         MemoryLevel::Register,
         Rc::new(subgraph),
@@ -60,7 +61,7 @@ fn main() {
 
     block.merge_loops();
 
-    // let code = block.emit().unwrap();
+    let code = block.emit().unwrap();
 
-    // println!("{}", code);
+    println!("{}", code);
 }

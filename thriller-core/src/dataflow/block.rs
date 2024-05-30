@@ -84,24 +84,16 @@ impl ThrillerBlock {
         let mut code = String::new();
 
         for edge in self.inputs.iter() {
-            if let Some(access) = edge.get_access() {
+            if edge.get_access().is_some() {
                 // TODO: Add access pattern support for load operation.
-                // let load = |access_map: &AccessMap| -> ThrillerResult<String> {
-                //     self.gen_load(access_map, edge)
-                // };
-                // code += access.gen_loop_access(&[load])?.as_str();
-                code += self.gen_load(access, edge)?.as_str();
+                code += self.gen_load(edge)?.as_str();
             }
         }
         Ok(code)
     }
 
     /// Generate load code for the block inputs.
-    pub(crate) fn gen_load(
-        &self,
-        _access_map: &AccessMap,
-        edge: &Rc<AttachedEdge>,
-    ) -> ThrillerResult<String> {
+    pub(crate) fn gen_load(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
         // TODO: This is not a final version of the load code generation. It is just a pseudocode representation of the formalized data flow.
         let mut code = String::new();
         // Generate load inputs.
@@ -258,7 +250,23 @@ impl ThrillerBlock {
                 let code = self.subgraph.emit()?;
                 Ok(code)
             } else {
-                unimplemented!();
+                // unimplemented!();
+                let mut code = String::new();
+                for group in self.loop_groups.iter() {
+                    let edges = &group.edges;
+                    let mut inner_code = String::new();
+
+                    for edge in edges.iter() {
+                        inner_code += &self.gen_load(edge)?;
+                    }
+
+                    let access_map = group.edges[0].get_access().as_ref().unwrap();
+                    code += access_map.gen_loop_access(inner_code)?.as_str();
+                }
+
+                // TODO: Add codegen for subgraph and split subgraph into different loops.
+
+                Ok(code)
             }
         }
     }
