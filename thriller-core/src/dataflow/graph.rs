@@ -128,7 +128,6 @@ impl ThrillerGraph {
         todo!("dfs not implemented yet");
     }
 
-    #[allow(dead_code)]
     pub(crate) fn bfs(
         &self,
         start_node: &Rc<RefCell<ThrillerNode>>,
@@ -150,7 +149,28 @@ impl ThrillerGraph {
     /// Try to find the disconnected subgraph in the graph.
     #[allow(dead_code)]
     pub(crate) fn try_find_disconnected_subgraph(&self) -> Option<Vec<ThrillerGraph>> {
-        todo!("find_disconnected_subgraph not implemented yet");
+        let mut node_groups = vec![];
+        // Iterate over all node with in_degrees = 0.
+        for node in &self.nodes {
+            let node_ref = node.borrow();
+            if node_ref.get_in_degrees() == 0 {
+                let group = self.bfs(node);
+                node_groups.push(group);
+            }
+        }
+
+        // Split the graph based on the groups.
+
+        let mut subgraphs = vec![];
+        for group in node_groups {
+            let mut subgraph = ThrillerGraph::new(self.mem_level);
+            subgraph.add_nodes(group);
+
+            // TODO: Add edges
+            subgraphs.push(subgraph);
+        }
+
+        Some(subgraphs)
     }
 
     /// Try to split graph based on various loop nests.
