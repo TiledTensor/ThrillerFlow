@@ -11,12 +11,6 @@ fn initialize_thriller_flow() -> PyResult<()> {
     Ok(())
 }
 
-// #[pyfunction]
-// fn create_buffer(name: String) -> PyResult<PyBuffer> {
-//     let buffer = PyBuffer(Buffer::new(name.as_str()));
-//     Ok(buffer)
-// }
-
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
 /// import the module.

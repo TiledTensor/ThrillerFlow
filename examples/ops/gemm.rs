@@ -42,10 +42,6 @@ fn main() {
     );
     let gemm_node = Rc::new(ThrillerNode::new(ThrillerNodeInner::Op(Box::new(gemm))));
 
-    // let edge_a = Rc::new(ThrillerEdge::new(node_a.clone(), gemm_node.clone()));
-    // let edge_b = Rc::new(ThrillerEdge::new(node_b.clone(), gemm_node.clone()));
-    // let edge_acc = Rc::new(ThrillerEdge::new(gemm_node.clone(), node_acc.clone()));
-
     let gemm_code = gemm_node.emit().unwrap();
 
     println!("{}", gemm_code);

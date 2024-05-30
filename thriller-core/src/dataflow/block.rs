@@ -7,8 +7,9 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, AccessMap, MemoryLevel};
 
-// use thriller_kernels::Sync;
 use crate::kernels::sync::Sync;
+
+use super::loop_analysis::LoopGroup;
 
 #[derive(PartialEq, Clone, Copy)]
 /// A map relation from inputs into outputs.
@@ -21,18 +22,18 @@ pub enum BlockType {
 
 /// A Thriller Dataflow Block representing a memory level subgraph.
 pub struct ThrillerBlock {
-    inputs: Vec<Rc<AttachedEdge>>,
-    outputs: Vec<Rc<AttachedEdge>>,
-    mem_level: MemoryLevel,
-    #[allow(dead_code)]
-    subgraph: Rc<ThrillerGraph>,
-    block_type: BlockType,
     id: usize,
-    unified_access_map: Option<Rc<AccessMap>>,
+    pub(crate) inputs: Vec<Rc<AttachedEdge>>,
+    pub(crate) outputs: Vec<Rc<AttachedEdge>>,
+    pub(crate) mem_level: MemoryLevel,
+    pub(crate) subgraph: Rc<ThrillerGraph>,
+    pub(crate) block_type: BlockType,
+    pub(crate) unified_access_map: Option<Rc<AccessMap>>,
+    pub(crate) loop_groups: Vec<LoopGroup>,
 }
 
 impl ThrillerBlock {
-    /// Create a new ThrillerBlock with the given inputs, outputs, memory level, subgraph, and block type.
+    /// Create a new [`ThrillerBlock`] with the given inputs, outputs, memory level, subgraph, and block type.
     pub fn new(
         inputs: Vec<Rc<AttachedEdge>>,
         outputs: Vec<Rc<AttachedEdge>>,
@@ -48,25 +49,9 @@ impl ThrillerBlock {
             block_type,
             id: next_id(),
             unified_access_map: None,
+            loop_groups: vec![],
         }
     }
-
-    // pub(crate) fn get_inputs(&self) -> &[Rc<AttachedEdge>] {
-    //     &self.inputs
-    // }
-
-    // pub(crate) fn get_inner_bufs(&self) -> Vec<String> {
-    //     // Iterate through the inputs and collect all dst buffers.
-    //     let mut bufs = Vec::new();
-    //     for input in self.inputs.iter() {
-    //         // if let Some(buf) = input.get_dst() {
-    //         //     bufs.push(buf.clone());
-    //         // }
-    //         let dst_buf = input.get_dst_name().clone();
-    //         bufs.push(dst_buf);
-    //     }
-    //     bufs
-    // }
 
     /// Get the block type.
     pub fn get_block_type(&self) -> BlockType {
@@ -79,31 +64,33 @@ impl ThrillerBlock {
         // If they are the same, then we can merge them into a unified access map.
 
         // TODO: Implement this function.
-        self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
+
+        self.merge_loops();
+        if self.loop_groups.len() == 1 {
+            self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
+        } else {
+            self.unified_access_map = None;
+        }
+    }
+
+    pub(crate) fn get_inputs(&self) -> &Vec<Rc<AttachedEdge>> {
+        &self.inputs
     }
 
     pub(crate) fn gen_loop_load(&self) -> ThrillerResult<String> {
         let mut code = String::new();
 
         for edge in self.inputs.iter() {
-            if let Some(access) = edge.get_access() {
+            if edge.get_access().is_some() {
                 // TODO: Add access pattern support for load operation.
-                // let load = |access_map: &AccessMap| -> ThrillerResult<String> {
-                //     self.gen_load(access_map, edge)
-                // };
-                // code += access.gen_loop_access(&[load])?.as_str();
-                code += self.gen_load(access, edge)?.as_str();
+                code += self.gen_load(edge)?.as_str();
             }
         }
         Ok(code)
     }
 
     /// Generate load code for the block inputs.
-    pub(crate) fn gen_load(
-        &self,
-        _access_map: &AccessMap,
-        edge: &Rc<AttachedEdge>,
-    ) -> ThrillerResult<String> {
+    pub(crate) fn gen_load(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
         // TODO: This is not a final version of the load code generation. It is just a pseudocode representation of the formalized data flow.
         let mut code = String::new();
         // Generate load inputs.
@@ -227,8 +214,8 @@ impl ThrillerBlock {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn get_mem_level(&self) -> MemoryLevel {
-        self.mem_level
+    pub(crate) fn split_subgraph(&mut self) {
+        unimplemented!()
     }
 
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
@@ -260,7 +247,23 @@ impl ThrillerBlock {
                 let code = self.subgraph.emit()?;
                 Ok(code)
             } else {
-                unimplemented!();
+                // unimplemented!();
+                let mut code = String::new();
+                for group in self.loop_groups.iter() {
+                    let edges = &group.edges;
+                    let mut inner_code = String::new();
+
+                    for edge in edges.iter() {
+                        inner_code += &self.gen_load(edge)?;
+                    }
+
+                    let access_map = group.edges[0].get_access().as_ref().unwrap();
+                    code += access_map.gen_loop_access(inner_code)?.as_str();
+                }
+
+                // TODO: Add codegen for subgraph and split subgraph into different loops.
+
+                Ok(code)
             }
         }
     }

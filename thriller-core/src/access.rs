@@ -132,3 +132,9 @@ impl PartialEq for AccessMap {
             && self.access_dims == other.access_dims
     }
 }
+
+impl Eq for AccessMap {
+    fn assert_receiver_is_total_eq(&self) {
+        todo!("Implement this function")
+    }
+}

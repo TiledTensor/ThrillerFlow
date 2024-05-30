@@ -4,19 +4,28 @@ use std::rc::Rc;
 use crate::access::AccessMap;
 use crate::buffer::Buffer;
 use crate::dataflow::ThrillerNode;
+use crate::next_id;
+use crate::var::Var;
 
 /// AttachedEdge is an edge that connects a source and destination buffer
 /// with additional access pattern information `AccessMap`.
 pub struct AttachedEdge {
-    src: Rc<Buffer>,
-    dst: Rc<Buffer>,
-    access: Option<Rc<AccessMap>>,
+    #[allow(dead_code)]
+    pub(crate) id: usize,
+    pub(crate) src: Rc<Buffer>,
+    pub(crate) dst: Rc<Buffer>,
+    pub(crate) access: Option<Rc<AccessMap>>,
 }
 
 impl AttachedEdge {
     /// Create a new `AttachedEdge` with the given source and destination buffers.
     pub fn new(src: Rc<Buffer>, dst: Rc<Buffer>, access: Option<Rc<AccessMap>>) -> Self {
-        AttachedEdge { src, dst, access }
+        AttachedEdge {
+            id: next_id(),
+            src,
+            dst,
+            access,
+        }
     }
 
     /// Get the source buffer of the edge.
@@ -37,6 +46,32 @@ impl AttachedEdge {
     /// Replace the access pattern of the edge.
     pub fn replace_access_map(&mut self, access: Rc<AccessMap>) {
         self.access = Some(access);
+    }
+
+    pub(crate) fn check_loop_equal(&self, other: &AttachedEdge) -> bool {
+        if let (Some(this), Some(other)) = (self.get_access(), other.get_access()) {
+            // Check `loop_depth` is the same.
+            if this.get_loop_depth() != other.get_loop_depth() {
+                return false;
+            }
+            // Check if iter_vars are the same.
+            if this.get_iter_vars().len() != other.get_iter_vars().len() {
+                return false;
+            }
+
+            for (this_iter_var, other_iter_var) in this
+                .get_iter_vars()
+                .iter()
+                .zip(other.get_iter_vars().iter())
+            {
+                if this_iter_var.get_id() != other_iter_var.get_id() {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        false
     }
 }
 
