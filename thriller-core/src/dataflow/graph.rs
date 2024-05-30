@@ -8,13 +8,16 @@ use crate::task::Task;
 use crate::{debug, AttachedEdge};
 use crate::{next_id, MemoryLevel, ThrillerResult};
 
+use super::loop_analysis::LoopGroup;
+
 /// Thriller Dataflow Graph structure.
-#[allow(dead_code)]
 #[derive(Default)]
 pub struct ThrillerGraph {
+    #[allow(dead_code)]
     id: usize,
     nodes: Vec<Rc<RefCell<ThrillerNode>>>,
     edges: Vec<Rc<ThrillerEdge>>,
+    #[allow(dead_code)]
     mem_level: MemoryLevel,
 }
 
@@ -117,6 +120,24 @@ impl ThrillerGraph {
     }
 }
 
+impl ThrillerGraph {
+    /// Try to find the disconnected subgraph in the graph.
+    #[allow(dead_code)]
+    pub(crate) fn try_find_disconnected_subgraph(&self) -> Option<Vec<ThrillerGraph>> {
+        todo!("find_disconnected_subgraph not implemented yet");
+    }
+
+    /// Try to split graph based on various loop nests.
+    #[allow(dead_code)]
+    pub(crate) fn try_split(&mut self, groups: &[LoopGroup]) -> Option<Vec<ThrillerGraph>> {
+        if groups.len() == 1 {
+            return None;
+        }
+
+        todo!("try_split not implemented yet");
+    }
+}
+
 impl Task for ThrillerGraph {
     fn emit(&self) -> ThrillerResult<String> {
         let mut code = String::new();
@@ -128,19 +149,6 @@ impl Task for ThrillerGraph {
                     code += op.emit()?.as_str();
                 }
                 ThrillerNodeInner::Block(block) => {
-                    // let indent = 4;
-                    // let block_code = block.emit()?;
-                    // let lines = block_code.lines().collect::<Vec<_>>();
-                    // code += "{\n";
-                    // for line in lines {
-                    //     code.push_str(&format!(
-                    //         "{indent}{line}\n",
-                    //         indent = " ".repeat(indent),
-                    //         line = line
-                    //     ));
-                    // }
-                    // code += "}\n";
-
                     code += block.emit()?.as_str();
                 }
                 _ => {}
