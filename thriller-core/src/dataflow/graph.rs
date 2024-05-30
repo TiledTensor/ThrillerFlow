@@ -120,7 +120,33 @@ impl ThrillerGraph {
     }
 }
 
+// Graph algorithms for [`ThrillerGraph`].
 impl ThrillerGraph {
+    /// Depth-first search on the graph.
+    #[allow(dead_code)]
+    pub(crate) fn dfs(&self, _visted: &HashMap<usize, bool>) {
+        todo!("dfs not implemented yet");
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn bfs(
+        &self,
+        start_node: &Rc<RefCell<ThrillerNode>>,
+    ) -> Vec<Rc<RefCell<ThrillerNode>>> {
+        let mut group = vec![];
+        let mut queue = vec![start_node.clone()];
+
+        while let Some(node) = queue.pop() {
+            group.push(node.clone());
+            let node_ref = node.borrow();
+            node_ref.get_nexts().iter().for_each(|next_node| {
+                queue.push(next_node.clone());
+            });
+        }
+
+        group
+    }
+
     /// Try to find the disconnected subgraph in the graph.
     #[allow(dead_code)]
     pub(crate) fn try_find_disconnected_subgraph(&self) -> Option<Vec<ThrillerGraph>> {
