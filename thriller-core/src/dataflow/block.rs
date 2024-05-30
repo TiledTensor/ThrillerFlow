@@ -63,8 +63,6 @@ impl ThrillerBlock {
         // Iterate over the inputs and check if the access maps are the same.
         // If they are the same, then we can merge them into a unified access map.
 
-        // TODO: Implement this function.
-
         self.merge_loops();
         if self.loop_groups.len() == 1 {
             self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
