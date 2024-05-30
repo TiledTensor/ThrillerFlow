@@ -7,7 +7,6 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, AccessMap, MemoryLevel};
 
-// use thriller_kernels::Sync;
 use crate::kernels::sync::Sync;
 
 use super::loop_analysis::LoopGroup;
@@ -217,8 +216,8 @@ impl ThrillerBlock {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn get_mem_level(&self) -> MemoryLevel {
-        self.mem_level
+    pub(crate) fn split_subgraph(&mut self) {
+        unimplemented!()
     }
 
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
