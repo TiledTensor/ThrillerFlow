@@ -11,15 +11,19 @@ thriller_utils = { path = "../thriller-utils" }
 
 [[example]]
 name = "topo_sort"
-path = "topo_sort.rs"
+path = "graph/topo_sort.rs"
 
 [[example]]
 name = "access"
-path = "access.rs"
+path = "loop/access.rs"
+
+[[example]]
+name = "multiloops"
+path = "loop/multiloops.rs"
 
 [[example]]
 name = "gemm"
-path = "gemm.rs"
+path = "ops/gemm.rs"
 
 [[example]]
 name = "rf_block"
@@ -34,5 +38,5 @@ name = "global_block"
 path = "gemm/global_block.rs"
 
 [[example]]
-name = "engine"
-path = "engine.rs"
+name = "gemm_codegen"
+path = "gemm/gemm_codegen.rs"

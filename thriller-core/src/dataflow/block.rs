@@ -10,6 +10,8 @@ use crate::{next_id, AccessMap, MemoryLevel};
 // use thriller_kernels::Sync;
 use crate::kernels::sync::Sync;
 
+use super::loop_analysis::LoopGroup;
+
 #[derive(PartialEq, Clone, Copy)]
 /// A map relation from inputs into outputs.
 pub enum BlockType {
@@ -21,14 +23,14 @@ pub enum BlockType {
 
 /// A Thriller Dataflow Block representing a memory level subgraph.
 pub struct ThrillerBlock {
-    inputs: Vec<Rc<AttachedEdge>>,
-    outputs: Vec<Rc<AttachedEdge>>,
-    mem_level: MemoryLevel,
-    #[allow(dead_code)]
-    subgraph: Rc<ThrillerGraph>,
-    block_type: BlockType,
     id: usize,
-    unified_access_map: Option<Rc<AccessMap>>,
+    pub(crate) inputs: Vec<Rc<AttachedEdge>>,
+    pub(crate) outputs: Vec<Rc<AttachedEdge>>,
+    pub(crate) mem_level: MemoryLevel,
+    pub(crate) subgraph: Rc<ThrillerGraph>,
+    pub(crate) block_type: BlockType,
+    pub(crate) unified_access_map: Option<Rc<AccessMap>>,
+    pub(crate) loop_groups: Vec<LoopGroup>,
 }
 
 impl ThrillerBlock {
@@ -48,6 +50,7 @@ impl ThrillerBlock {
             block_type,
             id: next_id(),
             unified_access_map: None,
+            loop_groups: vec![],
         }
     }
 
