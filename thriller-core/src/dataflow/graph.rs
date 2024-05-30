@@ -8,13 +8,16 @@ use crate::task::Task;
 use crate::{debug, AttachedEdge};
 use crate::{next_id, MemoryLevel, ThrillerResult};
 
+use super::loop_analysis::LoopGroup;
+
 /// Thriller Dataflow Graph structure.
-#[allow(dead_code)]
 #[derive(Default)]
 pub struct ThrillerGraph {
+    #[allow(dead_code)]
     id: usize,
     nodes: Vec<Rc<RefCell<ThrillerNode>>>,
     edges: Vec<Rc<ThrillerEdge>>,
+    #[allow(dead_code)]
     mem_level: MemoryLevel,
 }
 
@@ -117,6 +120,70 @@ impl ThrillerGraph {
     }
 }
 
+// Graph algorithms for [`ThrillerGraph`].
+impl ThrillerGraph {
+    /// Depth-first search on the graph.
+    #[allow(dead_code)]
+    pub(crate) fn dfs(&self, _visted: &HashMap<usize, bool>) {
+        todo!("dfs not implemented yet");
+    }
+
+    pub(crate) fn bfs(
+        &self,
+        start_node: &Rc<RefCell<ThrillerNode>>,
+    ) -> Vec<Rc<RefCell<ThrillerNode>>> {
+        let mut group = vec![];
+        let mut queue = vec![start_node.clone()];
+
+        while let Some(node) = queue.pop() {
+            group.push(node.clone());
+            let node_ref = node.borrow();
+            node_ref.get_nexts().iter().for_each(|next_node| {
+                queue.push(next_node.clone());
+            });
+        }
+
+        group
+    }
+
+    /// Try to find the disconnected subgraph in the graph.
+    #[allow(dead_code)]
+    pub(crate) fn try_find_disconnected_subgraph(&self) -> Option<Vec<ThrillerGraph>> {
+        let mut node_groups = vec![];
+        // Iterate over all node with in_degrees = 0.
+        for node in &self.nodes {
+            let node_ref = node.borrow();
+            if node_ref.get_in_degrees() == 0 {
+                let group = self.bfs(node);
+                node_groups.push(group);
+            }
+        }
+
+        // Split the graph based on the groups.
+
+        let mut subgraphs = vec![];
+        for group in node_groups {
+            let mut subgraph = ThrillerGraph::new(self.mem_level);
+            subgraph.add_nodes(group);
+
+            // TODO: Add edges
+            subgraphs.push(subgraph);
+        }
+
+        Some(subgraphs)
+    }
+
+    /// Try to split graph based on various loop nests.
+    #[allow(dead_code)]
+    pub(crate) fn try_split(&mut self, groups: &[LoopGroup]) -> Option<Vec<ThrillerGraph>> {
+        if groups.len() == 1 {
+            return None;
+        }
+
+        todo!("try_split not implemented yet");
+    }
+}
+
 impl Task for ThrillerGraph {
     fn emit(&self) -> ThrillerResult<String> {
         let mut code = String::new();
@@ -128,19 +195,6 @@ impl Task for ThrillerGraph {
                     code += op.emit()?.as_str();
                 }
                 ThrillerNodeInner::Block(block) => {
-                    // let indent = 4;
-                    // let block_code = block.emit()?;
-                    // let lines = block_code.lines().collect::<Vec<_>>();
-                    // code += "{\n";
-                    // for line in lines {
-                    //     code.push_str(&format!(
-                    //         "{indent}{line}\n",
-                    //         indent = " ".repeat(indent),
-                    //         line = line
-                    //     ));
-                    // }
-                    // code += "}\n";
-
                     code += block.emit()?.as_str();
                 }
                 _ => {}
