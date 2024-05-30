@@ -64,15 +64,13 @@ impl ThrillerBlock {
         // If they are the same, then we can merge them into a unified access map.
 
         // TODO: Implement this function.
-        self.inputs.windows(2).for_each(|window| {
-            let (first, second) = (&window[0], &window[1]);
-            assert!(
-                first.get_access() == second.get_access(),
-                "Access maps are not the same."
-            );
-        });
 
-        self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
+        self.merge_loops();
+        if self.loop_groups.len() == 1 {
+            self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
+        } else {
+            self.unified_access_map = None;
+        }
     }
 
     pub(crate) fn get_inputs(&self) -> &Vec<Rc<AttachedEdge>> {
