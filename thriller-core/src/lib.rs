@@ -11,6 +11,7 @@ mod error;
 mod id;
 mod kernels;
 mod log;
+mod shape;
 mod task;
 mod var;
 
