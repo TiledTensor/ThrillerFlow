@@ -9,4 +9,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.21.2", features = ["extension-module"] }
+numpy = { version = "0.21.0" }
 thriller_core = { path = "../thriller-core" }
