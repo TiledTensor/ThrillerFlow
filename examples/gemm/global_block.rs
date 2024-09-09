@@ -1,17 +1,17 @@
 use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
-    initialize, BlockLayout, BlockShape, BlockType, Buffer, MemoryLevel, RegularVar, ThrillerBlock,
+    initialize, BlockLayout, BlockShape, BlockType, MemoryLevel, RegularVar, ThrillerBlock,
     ThrillerEngine, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
-use thriller_utils::ThrillerUtils;
+use thriller_utils::{BufBuilder, ThrillerUtils};
 
 fn main() {
     initialize();
 
-    let g_a = Rc::new(Buffer::new("gA"));
-    let g_b = Rc::new(Buffer::new("gB"));
-    let g_c = Rc::new(Buffer::new("gC"));
+    let g_a = Rc::new(BufBuilder::row_major_global_tile("gA", &[256, 256]));
+    let g_b = Rc::new(BufBuilder::row_major_global_tile("gB", &[256, 256]));
+    let g_c = Rc::new(BufBuilder::row_major_global_tile("gC", &[256, 256]));
 
     let shared_block =
         ThrillerUtils::build_shared_gemm_block(g_a.clone(), g_b.clone(), g_c.clone());

@@ -7,8 +7,9 @@ pub struct PyBuffer(pub Buffer);
 #[pymethods]
 impl PyBuffer {
     #[new]
-    fn new(name: String) -> Self {
-        Self(Buffer::new(name.as_str()))
+    fn new(_name: String) -> Self {
+        // Self(Buffer::new(name.as_str()))
+        todo!()
     }
 
     fn __str__(&self) -> PyResult<String> {

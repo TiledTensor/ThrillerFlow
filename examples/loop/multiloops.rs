@@ -1,9 +1,11 @@
 use std::rc::Rc;
 
 use thriller_core::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer,
-    IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerGraph,
+    initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, IterationBound,
+    IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerGraph,
 };
+
+use thriller_utils::BufBuilder;
 
 fn main() {
     initialize();
@@ -40,10 +42,10 @@ fn main() {
 
     let access_map2 = Rc::new(access_map2);
 
-    let s_a = Rc::new(Buffer::new("sA"));
-    let r_a = Rc::new(Buffer::new("rA"));
-    let s_b = Rc::new(Buffer::new("sB"));
-    let r_b = Rc::new(Buffer::new("rB"));
+    let s_a = Rc::new(BufBuilder::row_major_shared_tile("sA", &[256, 256]));
+    let r_a = Rc::new(BufBuilder::row_major_reg_tile("sB", &[64, 64]));
+    let s_b = Rc::new(BufBuilder::col_major_shared_tile("sC", &[256, 256]));
+    let r_b = Rc::new(BufBuilder::row_major_reg_tile("rB", &[64, 64]));
 
     let in_edge0 = AttachedEdge::new(s_a.clone(), r_a.clone(), Some(access_map1.clone()));
     let in_edge1 = AttachedEdge::new(s_b.clone(), r_b.clone(), Some(access_map2.clone()));

@@ -2,22 +2,24 @@ use std::vec;
 use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer, Gemm,
+    initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Gemm,
     IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerEdge, ThrillerGraph,
     ThrillerNode, ThrillerNodeInner,
 };
 
+use thriller_utils::BufBuilder;
+
 fn main() {
     initialize();
-    let s_a = Rc::new(Buffer::new("sA"));
-    let r_a = Rc::new(Buffer::new("rA"));
-    let s_b = Rc::new(Buffer::new("sB"));
-    let r_b = Rc::new(Buffer::new("rB"));
+    let s_a = Rc::new(BufBuilder::row_major_shared_tile("sA", &[256, 256]));
+    let r_a = Rc::new(BufBuilder::row_major_reg_tile("rA", &[64, 64]));
+    let s_b = Rc::new(BufBuilder::col_major_shared_tile("sB", &[256, 256]));
+    let r_b = Rc::new(BufBuilder::row_major_reg_tile("rB", &[64, 64]));
     let mut in_edge0 = AttachedEdge::new(s_a, r_a.clone(), None);
     let mut in_edge1 = AttachedEdge::new(s_b, r_b.clone(), None);
 
-    let acc = Rc::new(Buffer::new("acc"));
-    let s_c = Rc::new(Buffer::new("sC"));
+    let acc = Rc::new(BufBuilder::row_major_reg_tile("rC", &[64, 64]));
+    let s_c = Rc::new(BufBuilder::row_major_shared_tile("sC", &[256, 256]));
     let out_edge = AttachedEdge::new(acc.clone(), s_c, None);
 
     let iter_var = Rc::new(IterationVar::new(

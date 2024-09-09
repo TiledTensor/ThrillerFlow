@@ -11,11 +11,12 @@ mod error;
 mod id;
 mod kernels;
 mod log;
+mod shape;
 mod task;
 mod var;
 
 pub use access::{AccessMap, AccessMatrix, AccessOffset};
-pub use buffer::Buffer;
+pub use buffer::{BufType, Buffer};
 pub use dataflow::{
     AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
     ThrillerNodeInner,
@@ -23,6 +24,7 @@ pub use dataflow::{
 pub use engine::{BlockLayout, BlockShape, ThrillerEngine};
 pub use error::{ThrillerError, ThrillerResult};
 pub use log::{debug, error, info, init_logger, set_max_level, trace, warn};
+pub use shape::{Dim, Dimension, Layout, Shape};
 pub use task::{Gemm, Task};
 pub use var::{IterationBound, IterationVar, RegularVar, Var};
 
