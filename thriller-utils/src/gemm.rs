@@ -7,18 +7,20 @@ use thriller_core::{
     ThrillerNodeInner,
 };
 
+use crate::BufBuilder;
+
 use crate::ThrillerUtils;
 
 impl ThrillerUtils {
     /// Build a RF level GEMM graph.
     pub fn build_gemm_rf_block(s_a: Rc<Buffer>, s_b: Rc<Buffer>, s_c: Rc<Buffer>) -> ThrillerBlock {
-        let r_a = Rc::new(Buffer::new("rA"));
-        let r_b = Rc::new(Buffer::new("rB"));
+        let r_a = Rc::new(BufBuilder::row_major_reg_tile("rA", &[64, 64]));
+        let r_b = Rc::new(BufBuilder::col_major_reg_tile("rB", &[64, 64]));
 
         let mut in_edge0 = AttachedEdge::new(s_a, r_a.clone(), None);
         let mut in_edge1 = AttachedEdge::new(s_b, r_b.clone(), None);
 
-        let acc = Rc::new(Buffer::new("acc"));
+        let acc = Rc::new(BufBuilder::row_major_reg_tile("acc", &[64, 64]));
 
         let out_edge = AttachedEdge::new(acc.clone(), s_c, None);
 
@@ -120,9 +122,9 @@ impl ThrillerUtils {
 
         let access_map = Rc::new(access_map);
 
-        let s_a = Rc::new(Buffer::new("sA"));
-        let s_b = Rc::new(Buffer::new("sB"));
-        let s_c = Rc::new(Buffer::new("sC"));
+        let s_a = Rc::new(BufBuilder::row_major_shared_tile("sA", &[256, 256]));
+        let s_b = Rc::new(BufBuilder::col_major_shared_tile("sB", &[256, 256]));
+        let s_c = Rc::new(BufBuilder::row_major_shared_tile("sC", &[256, 256]));
 
         let in_edge0 = AttachedEdge::new(g_a.clone(), s_a.clone(), Some(access_map.clone()));
         let in_edge1 = AttachedEdge::new(g_b.clone(), s_b.clone(), Some(access_map.clone()));

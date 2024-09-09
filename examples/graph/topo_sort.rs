@@ -2,16 +2,18 @@ use std::vec;
 use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationBound, IterationVar,
+    initialize, AccessMap, AccessMatrix, AccessOffset, Gemm, IterationBound, IterationVar,
     MemoryLevel, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 
+use thriller_utils::BufBuilder;
+
 fn main() {
     initialize();
-    let r_a = Rc::new(Buffer::new("rA"));
-    let r_b = Rc::new(Buffer::new("rB"));
+    let r_a = Rc::new(BufBuilder::row_major_reg_tile("rA", &[64, 64]));
+    let r_b = Rc::new(BufBuilder::row_major_reg_tile("rB", &[64, 64]));
 
-    let acc = Rc::new(Buffer::new("acc"));
+    let acc = Rc::new(BufBuilder::row_major_reg_tile("rC", &[64, 64]));
 
     let iter_var = Rc::new(IterationVar::new(
         "i",

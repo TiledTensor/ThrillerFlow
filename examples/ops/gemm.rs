@@ -1,9 +1,11 @@
 use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, Buffer, Gemm, IterationBound, IterationVar,
-    Task, ThrillerNode, ThrillerNodeInner,
+    initialize, AccessMap, AccessMatrix, AccessOffset, Gemm, IterationBound, IterationVar, Task,
+    ThrillerNode, ThrillerNodeInner,
 };
+
+use thriller_utils::BufBuilder;
 
 fn main() {
     initialize();
@@ -22,9 +24,9 @@ fn main() {
     access_map.add_access_offset(AccessOffset(vec![0]));
     access_map.add_access_offset(AccessOffset(vec![0]));
 
-    let buf_a = Rc::new(Buffer::new("rA"));
-    let buf_b = Rc::new(Buffer::new("rB"));
-    let buf_acc = Rc::new(Buffer::new("acc"));
+    let buf_a = Rc::new(BufBuilder::row_major_reg_tile("rA", &[64, 64]));
+    let buf_b = Rc::new(BufBuilder::row_major_reg_tile("rB", &[64, 64]));
+    let buf_acc = Rc::new(BufBuilder::row_major_reg_tile("rC", &[64, 64]));
 
     let node_a = Rc::new(RefCell::new(ThrillerNode::new(ThrillerNodeInner::Buffer(
         buf_a.clone(),

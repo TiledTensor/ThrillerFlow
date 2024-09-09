@@ -1,27 +1,36 @@
-use crate::next_id;
+use crate::shape::Ix;
+use crate::{next_id, Dim, Layout, Shape};
 
-// /// Tile typing description.
-// pub enum TileTyping {
-//     GlobalTile,
-//     SharedTile,
-//     RegTile,
-//     RegVec,
-// }
+/// Buffer type.
+pub enum BufType {
+    /// Global Tile
+    GlobalTile,
+    /// Shared Tile
+    SharedTile,
+    /// Register Tile
+    RegTile,
+    /// Register Vector
+    RegVec,
+}
 
 /// A Buffer data structure.
 #[allow(dead_code)]
 pub struct Buffer {
     name: String,
     id: usize,
+    typing: BufType,
+    shape: Shape,
 }
 
 impl Buffer {
     /// Create a new Buffer with the given name.
-    pub fn new(name: &str) -> Self {
+    pub fn new(name: &str, typing: BufType, dim: &[Ix], layout: Layout<Dim>) -> Self {
         let id = next_id();
         Buffer {
             name: name.to_string(),
             id,
+            typing,
+            shape: Shape::new(dim, layout),
         }
     }
 

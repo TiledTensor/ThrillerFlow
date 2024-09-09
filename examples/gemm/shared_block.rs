@@ -2,11 +2,11 @@ use std::vec;
 use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
-    initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, Buffer,
-    IterationBound, IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerEdge, ThrillerGraph,
-    ThrillerNode, ThrillerNodeInner,
+    initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, IterationBound,
+    IterationVar, MemoryLevel, Task, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
+    ThrillerNodeInner,
 };
-use thriller_utils::ThrillerUtils;
+use thriller_utils::{BufBuilder, ThrillerUtils};
 
 fn main() {
     initialize();
@@ -27,12 +27,12 @@ fn main() {
 
     let access_map = Rc::new(access_map);
 
-    let s_a = Rc::new(Buffer::new("sA"));
-    let s_b = Rc::new(Buffer::new("sB"));
-    let s_c = Rc::new(Buffer::new("sC"));
-    let g_a = Rc::new(Buffer::new("gA"));
-    let g_b = Rc::new(Buffer::new("gB"));
-    let g_c = Rc::new(Buffer::new("gC"));
+    let s_a = Rc::new(BufBuilder::row_major_shared_tile("sA", &[256, 256]));
+    let s_b = Rc::new(BufBuilder::col_major_shared_tile("sB", &[256, 256]));
+    let s_c = Rc::new(BufBuilder::row_major_shared_tile("sC", &[256, 256]));
+    let g_a = Rc::new(BufBuilder::row_major_global_tile("gA", &[256, 256]));
+    let g_b = Rc::new(BufBuilder::col_major_global_tile("gB", &[256, 256]));
+    let g_c = Rc::new(BufBuilder::row_major_global_tile("gC", &[256, 256]));
 
     let in_edge0 = AttachedEdge::new(g_a.clone(), s_a.clone(), Some(access_map.clone()));
     let in_edge1 = AttachedEdge::new(g_b.clone(), s_b.clone(), Some(access_map.clone()));
