@@ -44,4 +44,14 @@ impl Buffer {
     pub fn get_id(&self) -> usize {
         self.id
     }
+
+    /// Get Buffer Layout.
+    pub fn get_shape(&self) -> &Shape {
+        &self.shape
+    }
+
+    /// Get Buffer Typing
+    pub fn get_typing(&self) -> &BufType {
+        &self.typing
+    }
 }

@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use buffer::{PyBuffer, PyLayout};
+use buffer::{PyBufType, PyBuffer, PyLayout};
 use thriller_core::initialize;
 
 mod buffer;
@@ -19,5 +19,6 @@ fn thriller_flow(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(initialize_thriller_flow, m)?)?;
     m.add_class::<PyBuffer>()?;
     m.add_class::<PyLayout>()?;
+    m.add_class::<PyBufType>()?;
     Ok(())
 }
