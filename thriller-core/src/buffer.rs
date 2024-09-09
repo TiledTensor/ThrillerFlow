@@ -2,6 +2,7 @@ use crate::shape::Ix;
 use crate::{next_id, Dim, Layout, Shape};
 
 /// Buffer type.
+#[derive(Clone, Copy, Debug)]
 pub enum BufType {
     /// Global Tile
     GlobalTile,
@@ -42,5 +43,15 @@ impl Buffer {
     /// Get Buffer id.
     pub fn get_id(&self) -> usize {
         self.id
+    }
+
+    /// Get Buffer Layout.
+    pub fn get_shape(&self) -> &Shape {
+        &self.shape
+    }
+
+    /// Get Buffer Typing
+    pub fn get_typing(&self) -> &BufType {
+        &self.typing
     }
 }
