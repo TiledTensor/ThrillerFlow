@@ -1,6 +1,9 @@
+use smallvec::{smallvec, SmallVec};
+
 /// Array index type.
 pub type Ix = usize;
 
+/// Dimension description.
 pub trait Dimension {
     /// Returns the number of dimensions (number of axes).
     fn ndim(&self) -> usize;
@@ -8,35 +11,39 @@ pub trait Dimension {
     /// Creates a dimension of all zeros with the specified ndim.
     fn zeros(ndim: usize) -> Self;
 
+    #[doc(hidden)]
     fn slice(&self) -> &[Ix];
 
+    #[doc(hidden)]
     fn slice_mut(&mut self) -> &mut [Ix];
 
-    fn default_strides(&self) -> &[Ix];
+    ///  returns the strides for a standard layout with the given shape.
+    fn default_strides(&self) -> Self;
 
-    fn fortran_strides(&self) -> &[Ix];
+    /// Returns the strides for a Fortran layout array with the given shape.
+    fn fortran_strides(&self) -> Self;
 }
 
 /// Stride description.
-#[derive(Clone, Copy)]
-pub(crate) enum Strides<D> {
+#[derive(Clone, Copy, Debug)]
+pub enum Layout<D> {
     /// Row-major
     RowMajor,
     /// Column-major
     ColumnMajor,
-    // /// Custom strides
+    /// Custom strides
     Custom(D),
 }
 
-impl<D> Strides<D>
+impl<D> Layout<D>
 where
     D: Dimension,
 {
-    pub(crate) fn strides_for_dim(self, dim: &D) -> &[Ix] {
+    pub(crate) fn strides_for_dim(self, dim: &D) -> D {
         match self {
-            Strides::RowMajor => dim.default_strides(),
-            Strides::ColumnMajor => dim.fortran_strides(),
-            Strides::Custom(_) => {
+            Layout::RowMajor => dim.default_strides(),
+            Layout::ColumnMajor => dim.fortran_strides(),
+            Layout::Custom(_) => {
                 todo!()
             }
         }
@@ -47,9 +54,9 @@ where
 ///
 /// `Dim` describes the number of axes and the length of each axis
 /// in an array. It is also used as an index type.
-#[derive(Clone, Copy)]
+#[derive(Clone, Debug)]
 pub struct Dim {
-    dims: [Ix; 4],
+    dims: SmallVec<[Ix; 4]>,
     ndim: usize,
 }
 
@@ -57,11 +64,9 @@ impl Dim {
     /// Create a new Dim.
     pub fn new(dims: &[Ix]) -> Self {
         let ndim = dims.len();
-        let mut new_dims = [0; 4];
-        let mut index = 3;
-        for dim in dims.iter().rev() {
-            new_dims[index] = *dim;
-            index -= 1;
+        let mut new_dims = smallvec![];
+        for dim in dims.iter() {
+            new_dims.push(*dim);
         }
 
         Self {
@@ -77,7 +82,10 @@ impl Dimension for Dim {
     }
 
     fn zeros(ndim: usize) -> Self {
-        Self { dims: [0; 4], ndim }
+        Self {
+            dims: smallvec![0; ndim],
+            ndim,
+        }
     }
 
     fn slice(&self) -> &[Ix] {
@@ -88,31 +96,51 @@ impl Dimension for Dim {
         &mut self.dims[..self.ndim]
     }
 
-    fn default_strides(&self) -> &[Ix] {
-        todo!()
+    fn default_strides(&self) -> Self {
+        // Compute default strides
+        // Shape (a, b, c) => Give strides (b * c, c, 1)
+        let mut strides = Self::zeros(self.ndim);
+        // For empty arrays, use all zero strides
+        if self.slice().iter().all(|&d| d != 0) {
+            let mut it = strides.slice_mut().iter_mut().rev();
+
+            if let Some(rs) = it.next() {
+                *rs = 1;
+            }
+
+            let mut cum_prod = 1;
+            for (rs, dim) in it.zip(self.slice().iter().rev()) {
+                cum_prod *= dim;
+                *rs = cum_prod;
+            }
+        }
+
+        strides
     }
 
-    fn fortran_strides(&self) -> &[Ix] {
+    fn fortran_strides(&self) -> Self {
         todo!()
     }
 }
 
 /// Shape description.
+#[derive(Clone, Debug)]
 pub struct Shape {
     dims: Dim,
-    strides: Strides<Dim>,
+    layout: Layout<Dim>,
 }
 
 impl Shape {
-    pub fn new(dims: &[Ix], strides: Strides<Dim>) -> Self {
+    /// Create a new Shape.
+    pub fn new(dims: &[Ix], layout: Layout<Dim>) -> Self {
         Self {
             dims: Dim::new(dims),
-            strides,
+            layout,
         }
     }
 
     /// Compute the stride for the given dimension.
-    pub fn get_strides(&self) -> &[Ix] {
-        self.strides.strides_for_dim(&self.dims)
+    pub fn get_strides(&self) -> Dim {
+        self.layout.clone().strides_for_dim(&self.dims)
     }
 }

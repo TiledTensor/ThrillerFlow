@@ -1,5 +1,13 @@
 use crate::next_id;
 
+// /// Tile typing description.
+// pub enum TileTyping {
+//     GlobalTile,
+//     SharedTile,
+//     RegTile,
+//     RegVec,
+// }
+
 /// A Buffer data structure.
 #[allow(dead_code)]
 pub struct Buffer {

@@ -12,3 +12,7 @@ thriller_utils = { path = "../thriller-utils" }
 [[test]]
 name = "id"
 path = "id.rs"
+
+[[test]]
+name = "shape"
+path = "shape.rs"
