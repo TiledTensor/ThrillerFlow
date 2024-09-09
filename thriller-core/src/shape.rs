@@ -118,8 +118,24 @@ impl Dimension for Dim {
         strides
     }
 
+    /// Returns the strides for a Fortran layout array with the given shape.
     fn fortran_strides(&self) -> Self {
-        todo!()
+        // Compute fortan array strides
+        // Shape (a, b, c) => Give strides (1, a, a * b)
+        let mut strides = Self::zeros(self.ndim);
+        // For empty arrays, use all zero strides
+        if self.slice().iter().all(|&d| d != 0) {
+            let mut it = strides.slice_mut().iter_mut();
+            if let Some(rs) = it.next() {
+                *rs = 1;
+            }
+            let mut cum_prod = 1;
+            for (rs, dim) in it.zip(self.slice().iter()) {
+                cum_prod *= dim;
+                *rs = cum_prod;
+            }
+        }
+        strides
     }
 }
 
