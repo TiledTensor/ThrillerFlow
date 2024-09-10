@@ -34,7 +34,8 @@ if __name__ == '__main__':
     NodeB = pythriller.PyNode(rB)
     NodeC = pythriller.PyNode(acc)
 
-    GemmNode = pythriller.Gemm(NodeA, NodeB, NodeC)
+    GemmNode = pythriller.PyNode.gemm(NodeA, NodeB, NodeC)
+
     code = GemmNode.codegen()
 
     print(code)

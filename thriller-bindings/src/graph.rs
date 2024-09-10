@@ -1,6 +1,9 @@
 use pyo3::prelude::*;
 
-use thriller_core::{MemoryLevel, ThrillerEdge, ThrillerGraph, ThrillerNode};
+use thriller_core::{
+    AccessMap, Gemm, MemoryLevel, Task, ThrillerEdge, ThrillerGraph, ThrillerNode,
+    ThrillerNodeInner,
+};
 
 use crate::buffer::PyBuffer;
 
@@ -41,6 +44,26 @@ impl PyNode {
             buf.0.clone(),
         )));
         PyNode(Rc::new(RefCell::new(node)))
+    }
+
+    fn gemm(a: PyRef<PyNode>, b: PyRef<PyNode>, c: PyRef<PyNode>) -> Self {
+        let access_map = AccessMap::new(0, vec![]);
+
+        let node_a = Rc::clone(&a.0);
+        let node_b = Rc::clone(&b.0);
+        let node_c = Rc::clone(&c.0);
+
+        let gemm = Gemm::new(vec![node_a, node_b], node_c, Rc::new(access_map));
+
+        let node = ThrillerNode::new(ThrillerNodeInner::Op(Box::new(gemm)));
+
+        PyNode(Rc::new(RefCell::new(node)))
+    }
+
+    fn codegen(&self) -> PyResult<String> {
+        let node = self.0.borrow();
+        node.emit()
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{:?}", e)))
     }
 }
 
