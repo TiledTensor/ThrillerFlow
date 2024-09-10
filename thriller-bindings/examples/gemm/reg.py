@@ -36,8 +36,14 @@ if __name__ == '__main__':
 
     GemmNode = pythriller.PyNode.gemm(NodeA, NodeB, NodeAcc)
 
-    RegGraph.add_nodes([NodeA, NodeB, NodeAcc, GemmNode])
+    EdgeA_Gemm = pythriller.PyEdge(NodeA, GemmNode)
+    EdgeB_GEMM = pythriller.PyEdge(NodeB, GemmNode)
+    EdgeGemm_Acc = pythriller.PyEdge(GemmNode, NodeAcc)
 
-    code = GemmNode.codegen()
+    RegGraph.add_nodes([NodeA, NodeB, NodeAcc, GemmNode])
+    RegGraph.add_edges([EdgeA_Gemm, EdgeB_GEMM, EdgeGemm_Acc])
+
+    RegGraph.connect()
+    code = RegGraph.codegen()
 
     print(code)

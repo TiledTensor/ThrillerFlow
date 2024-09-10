@@ -46,6 +46,42 @@ impl PyGraph {
         self.0.add_nodes(nodes);
         Ok(())
     }
+
+    fn add_edges(&mut self, edges: &Bound<'_, PyList>) -> PyResult<()> {
+        let edges = edges
+            .into_iter()
+            .map(|edge| {
+                // TODO(KuangjuX): fix `unwarp`.
+                let edge = edge.extract::<PyRef<PyEdge>>().unwrap();
+                Rc::clone(&edge.0)
+            })
+            .collect::<Vec<_>>();
+
+        self.0.add_edges(edges);
+        Ok(())
+    }
+
+    // fn topology_sort(&mut self, py: Python<'_>) -> PyResult<&Bound<'_, PyList>> {
+    //     let sorted_nodes = self.0.topo_sort();
+
+    //     let sorted_nodes = sorted_nodes
+    //         .into_iter()
+    //         .map(|node| PyNode(node))
+    //         .collect::<Vec<_>>();
+    //     let list = PyList::new_bound(py, sorted_nodes);
+
+    //     Ok(&list)
+    // }
+
+    fn connect(&mut self) {
+        self.0.connect();
+    }
+
+    fn codegen(&self) -> PyResult<String> {
+        self.0
+            .emit()
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{:?}", e)))
+    }
 }
 
 #[pyclass(unsendable)]
@@ -83,4 +119,15 @@ impl PyNode {
 }
 
 #[pyclass(unsendable)]
-pub struct PyEdge(pub ThrillerEdge);
+pub struct PyEdge(pub Rc<ThrillerEdge>);
+
+#[pymethods]
+impl PyEdge {
+    #[new]
+    fn new(src: PyRef<PyNode>, dst: PyRef<PyNode>) -> Self {
+        let src = Rc::clone(&src.0);
+        let dst = Rc::clone(&dst.0);
+        let edge = ThrillerEdge::new(src, dst);
+        PyEdge(Rc::new(edge))
+    }
+}
