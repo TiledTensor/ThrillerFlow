@@ -32,9 +32,11 @@ if __name__ == '__main__':
 
     NodeA = pythriller.PyNode(rA)
     NodeB = pythriller.PyNode(rB)
-    NodeC = pythriller.PyNode(acc)
+    NodeAcc = pythriller.PyNode(acc)
 
-    GemmNode = pythriller.PyNode.gemm(NodeA, NodeB, NodeC)
+    GemmNode = pythriller.PyNode.gemm(NodeA, NodeB, NodeAcc)
+
+    RegGraph.add_nodes([NodeA, NodeB, NodeAcc, GemmNode])
 
     code = GemmNode.codegen()
 

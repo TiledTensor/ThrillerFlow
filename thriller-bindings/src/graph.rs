@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use pyo3::types::PyList;
 
 use thriller_core::{
     AccessMap, Gemm, MemoryLevel, Task, ThrillerEdge, ThrillerGraph, ThrillerNode,
@@ -30,6 +31,20 @@ impl PyGraph {
         };
 
         PyGraph(ThrillerGraph::new(mem_level))
+    }
+
+    fn add_nodes(&mut self, nodes: &Bound<'_, PyList>) -> PyResult<()> {
+        let nodes = nodes
+            .into_iter()
+            .map(|node| {
+                // TODO(KuangjuX): fix `unwarp`.
+                let node = node.extract::<PyRef<PyNode>>().unwrap();
+                Rc::clone(&node.0)
+            })
+            .collect::<Vec<_>>();
+
+        self.0.add_nodes(nodes);
+        Ok(())
     }
 }
 
