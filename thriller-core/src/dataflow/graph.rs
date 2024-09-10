@@ -9,12 +9,13 @@ use crate::{debug, AttachedEdge};
 use crate::{next_id, MemoryLevel, ThrillerResult};
 
 /// Thriller Dataflow Graph structure.
-#[allow(dead_code)]
 #[derive(Default)]
 pub struct ThrillerGraph {
+    #[allow(dead_code)]
     id: usize,
     nodes: Vec<Rc<RefCell<ThrillerNode>>>,
     edges: Vec<Rc<ThrillerEdge>>,
+    #[allow(dead_code)]
     mem_level: MemoryLevel,
 }
 
@@ -128,19 +129,6 @@ impl Task for ThrillerGraph {
                     code += op.emit()?.as_str();
                 }
                 ThrillerNodeInner::Block(block) => {
-                    // let indent = 4;
-                    // let block_code = block.emit()?;
-                    // let lines = block_code.lines().collect::<Vec<_>>();
-                    // code += "{\n";
-                    // for line in lines {
-                    //     code.push_str(&format!(
-                    //         "{indent}{line}\n",
-                    //         indent = " ".repeat(indent),
-                    //         line = line
-                    //     ));
-                    // }
-                    // code += "}\n";
-
                     code += block.emit()?.as_str();
                 }
                 _ => {}

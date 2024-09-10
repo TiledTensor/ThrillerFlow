@@ -16,6 +16,7 @@ pub enum BufType {
 
 /// A Buffer data structure.
 #[allow(dead_code)]
+#[derive(Clone, Debug)]
 pub struct Buffer {
     name: String,
     id: usize,
