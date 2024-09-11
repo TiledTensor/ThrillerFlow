@@ -68,8 +68,8 @@ impl ThrillerNode {
         &self.nexts
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn get_inner(&self) -> &ThrillerNodeInner {
+    #[doc(hidden)]
+    pub fn get_inner(&self) -> &ThrillerNodeInner {
         &self.inner
     }
 

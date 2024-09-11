@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::vec::Vec;
 
@@ -26,7 +27,7 @@ pub struct ThrillerBlock {
     pub(crate) inputs: Vec<Rc<AttachedEdge>>,
     pub(crate) outputs: Vec<Rc<AttachedEdge>>,
     pub(crate) mem_level: MemoryLevel,
-    pub(crate) subgraph: Rc<ThrillerGraph>,
+    pub(crate) subgraph: Rc<RefCell<ThrillerGraph>>,
     pub(crate) block_type: BlockType,
     pub(crate) unified_access_map: Option<Rc<AccessMap>>,
     pub(crate) loop_groups: Vec<LoopGroup>,
@@ -38,7 +39,7 @@ impl ThrillerBlock {
         inputs: Vec<Rc<AttachedEdge>>,
         outputs: Vec<Rc<AttachedEdge>>,
         mem_level: MemoryLevel,
-        subgraph: Rc<ThrillerGraph>,
+        subgraph: Rc<RefCell<ThrillerGraph>>,
         block_type: BlockType,
     ) -> Self {
         ThrillerBlock {
@@ -228,11 +229,11 @@ impl ThrillerBlock {
             if self.mem_level == MemoryLevel::Shared {
                 inner_code += Sync::emit_copy_async().as_str();
             }
-            inner_code += self.subgraph.emit()?.as_str();
+            inner_code += self.subgraph.borrow().emit()?.as_str();
             code += access_map.gen_loop_access(inner_code)?.as_str();
 
             code += Sync::emit_sync().as_str();
-            if let Some(reduce_outputs) = self.subgraph.reduce_block_outputs() {
+            if let Some(reduce_outputs) = self.subgraph.borrow().reduce_block_outputs() {
                 // self.outputs.extend(reduce_outputs);
                 for output in reduce_outputs {
                     code += &self.emit_store(&output)?;
@@ -244,7 +245,7 @@ impl ThrillerBlock {
         } else {
             // TODO: Handle cases without an unified access map.
             if self.inputs.is_empty() && self.outputs.is_empty() {
-                let code = self.subgraph.emit()?;
+                let code = self.subgraph.borrow().emit()?;
                 Ok(code)
             } else {
                 // unimplemented!();

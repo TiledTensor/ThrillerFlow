@@ -91,7 +91,7 @@ impl ThrillerUtils {
             vec![Rc::new(in_edge0), Rc::new(in_edge1)],
             vec![Rc::new(out_edge)],
             MemoryLevel::Register,
-            Rc::new(subgraph),
+            Rc::new(RefCell::new(subgraph)),
             BlockType::Reduce,
         );
 
@@ -176,7 +176,7 @@ impl ThrillerUtils {
             vec![Rc::new(in_edge0), Rc::new(in_edge1)],
             vec![Rc::new(out_edge)],
             MemoryLevel::Shared,
-            Rc::new(subgraph),
+            Rc::new(RefCell::new(subgraph)),
             BlockType::Map,
         );
 

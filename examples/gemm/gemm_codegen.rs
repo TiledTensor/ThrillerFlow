@@ -25,7 +25,7 @@ fn main() {
 
     global_graph.add_nodes(vec![shared_block_node.clone()]);
 
-    let global_graph = Rc::new(global_graph);
+    let global_graph = Rc::new(RefCell::new(global_graph));
 
     let global_block = ThrillerBlock::new(
         vec![],

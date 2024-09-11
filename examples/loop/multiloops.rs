@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
     initialize, AccessMap, AccessMatrix, AccessOffset, AttachedEdge, BlockType, IterationBound,
@@ -57,7 +57,7 @@ fn main() {
         vec![Rc::new(in_edge0), Rc::new(in_edge1), Rc::new(in_edge2)],
         vec![],
         MemoryLevel::Register,
-        Rc::new(subgraph),
+        Rc::new(RefCell::new(subgraph)),
         BlockType::Reduce,
     );
 
