@@ -1,8 +1,10 @@
+use std::rc::Rc;
+
 use pyo3::prelude::*;
 use thriller_core::{BufType, Buffer, Dim, Layout};
 
-#[pyclass]
-pub struct PyBuffer(pub Buffer);
+#[pyclass(unsendable)]
+pub struct PyBuffer(pub Rc<Buffer>);
 
 #[pyclass]
 pub enum PyLayout {
@@ -34,7 +36,7 @@ impl PyBuffer {
             PyBufType::RegVec => BufType::RegVec,
         };
 
-        Self(Buffer::new(name.as_str(), buf_type, &dim, layout))
+        Self(Rc::new(Buffer::new(name.as_str(), buf_type, &dim, layout)))
     }
 
     fn __str__(&self) -> PyResult<String> {

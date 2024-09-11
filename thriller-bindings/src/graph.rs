@@ -18,7 +18,7 @@ pub enum PyMemoryLevel {
 }
 
 #[pyclass(unsendable)]
-pub struct PyGraph(pub ThrillerGraph);
+pub struct PyGraph(pub Rc<RefCell<ThrillerGraph>>);
 
 #[pymethods]
 impl PyGraph {
@@ -30,7 +30,7 @@ impl PyGraph {
             PyMemoryLevel::Global => MemoryLevel::Global,
         };
 
-        PyGraph(ThrillerGraph::new(mem_level))
+        PyGraph(Rc::new(RefCell::new(ThrillerGraph::new(mem_level))))
     }
 
     fn add_nodes(&mut self, nodes: &Bound<'_, PyList>) -> PyResult<()> {
@@ -43,7 +43,7 @@ impl PyGraph {
             })
             .collect::<Vec<_>>();
 
-        self.0.add_nodes(nodes);
+        self.0.borrow_mut().add_nodes(nodes);
         Ok(())
     }
 
@@ -57,28 +57,17 @@ impl PyGraph {
             })
             .collect::<Vec<_>>();
 
-        self.0.add_edges(edges);
+        self.0.borrow_mut().add_edges(edges);
         Ok(())
     }
 
-    // fn topology_sort(&mut self, py: Python<'_>) -> PyResult<&Bound<'_, PyList>> {
-    //     let sorted_nodes = self.0.topo_sort();
-
-    //     let sorted_nodes = sorted_nodes
-    //         .into_iter()
-    //         .map(|node| PyNode(node))
-    //         .collect::<Vec<_>>();
-    //     let list = PyList::new_bound(py, sorted_nodes);
-
-    //     Ok(&list)
-    // }
-
     fn connect(&mut self) {
-        self.0.connect();
+        self.0.borrow_mut().connect();
     }
 
     fn codegen(&self) -> PyResult<String> {
         self.0
+            .borrow()
             .emit()
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(format!("{:?}", e)))
     }
@@ -91,9 +80,7 @@ pub struct PyNode(pub Rc<RefCell<ThrillerNode>>);
 impl PyNode {
     #[new]
     fn buffer(buf: &PyBuffer) -> Self {
-        let node = ThrillerNode::new(thriller_core::ThrillerNodeInner::Buffer(Rc::new(
-            buf.0.clone(),
-        )));
+        let node = ThrillerNode::new(thriller_core::ThrillerNodeInner::Buffer(Rc::clone(&buf.0)));
         PyNode(Rc::new(RefCell::new(node)))
     }
 

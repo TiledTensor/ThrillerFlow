@@ -1,10 +1,12 @@
-use op::PyGemm;
 use pyo3::prelude::*;
 
+use block::{PyAttachedEdge, PyBlock, PyBlockType};
 use buffer::{PyBufType, PyBuffer, PyLayout};
 use graph::{PyEdge, PyGraph, PyMemoryLevel, PyNode};
+use op::PyGemm;
 use thriller_core::initialize;
 
+mod block;
 mod buffer;
 mod graph;
 mod op;
@@ -31,6 +33,10 @@ fn thriller_flow(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyMemoryLevel>()?;
 
     m.add_class::<PyGemm>()?;
+
+    m.add_class::<PyBlock>()?;
+    m.add_class::<PyAttachedEdge>()?;
+    m.add_class::<PyBlockType>()?;
 
     Ok(())
 }
