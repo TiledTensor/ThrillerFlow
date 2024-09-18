@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use thriller_core::{AttachedEdge, BlockType, MemoryLevel, Task, ThrillerBlock};
+use thriller_core::{AttachedEdge, BlockType, Task, ThrillerBlock};
 
 use pyo3::{prelude::*, types::PyList};
 

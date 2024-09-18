@@ -101,6 +101,9 @@ impl ThrillerBlock {
         for edge in self.inputs.iter() {
             let sbuf = &edge.src;
             let dbuf = &edge.dst;
+
+            // TODO(KuangjuX): Support Access Memory code generation.
+            #[allow(unused_variables)]
             let access_map = edge
                 .get_access()
                 .as_ref()
@@ -137,6 +140,9 @@ impl ThrillerBlock {
         for edge in self.outputs.iter() {
             let sbuf = &edge.src;
             let dbuf = &edge.dst;
+
+            // TODO(KuangjuX): Support Access Memory code generation.
+            #[allow(unused_variables)]
             let access_map = edge
                 .get_access()
                 .as_ref()

@@ -5,7 +5,6 @@ use crate::access::AccessMap;
 use crate::buffer::Buffer;
 use crate::dataflow::ThrillerNode;
 use crate::next_id;
-use crate::var::Var;
 
 /// AttachedEdge is an edge that connects a source and destination buffer
 /// with additional access pattern information `AccessMap`.
@@ -69,20 +68,4 @@ impl ThrillerEdge {
     pub(crate) fn get_dst(&self) -> Rc<RefCell<ThrillerNode>> {
         self.dst.clone()
     }
-
-    // /// Get the source node name of the edge.
-    // pub fn get_src_name(&self) -> &String {
-    //     match self.get_src().borrow().get_inner() {
-    //         ThrillerNodeInner::Buffer(buffer) => buffer.get_name(),
-    //         _ => panic!("Source is not a buffer"),
-    //     }
-    // }
-
-    // /// Get the destination node name of the edge.
-    // pub fn get_dst_name(&self) -> &String {
-    //     match self.dst.borrow().get_inner() {
-    //         ThrillerNodeInner::Buffer(buffer) => buffer.get_name(),
-    //         _ => panic!("Destination is not a buffer"),
-    //     }
-    // }
 }
