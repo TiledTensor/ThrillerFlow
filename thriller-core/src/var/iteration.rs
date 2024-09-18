@@ -4,6 +4,7 @@ use super::{regular::RegularVar, Var};
 use crate::next_id;
 
 /// A bound of the iteration variable.
+#[derive(Clone)]
 pub enum IterationBound {
     /// A fixed bound.
     Fixed(usize),
@@ -30,6 +31,7 @@ impl Display for IterationBound {
 }
 
 /// A Variable that represents a loop index.
+#[derive(Clone)]
 pub struct IterationVar {
     name: String,
     id: usize,

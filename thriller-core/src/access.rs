@@ -36,6 +36,11 @@ impl AccessMap {
         self.iter_vars.push(iter_var);
     }
 
+    /// Add iter vars to access map.
+    pub fn add_iter_vars(&mut self, iter_vars: Vec<Rc<IterationVar>>) {
+        self.iter_vars.extend(iter_vars);
+    }
+
     /// Get iter vars in access map.
     pub fn get_iter_vars(&self) -> &Vec<Rc<IterationVar>> {
         &self.iter_vars
@@ -67,10 +72,7 @@ impl AccessMap {
     }
 
     /// Generate loop based on `AccessMap` information.
-    pub fn gen_loop_access(&self, inner_code: String) -> ThrillerResult<String>
-// where
-        // F: Fn(&AccessMap) -> ThrillerResult<String>,
-    {
+    pub fn gen_loop_access(&self, inner_code: String) -> ThrillerResult<String> {
         let mut code = String::new();
         let mut indent = 0;
         if self.loop_depth != self.iter_vars.len() {
@@ -91,10 +93,6 @@ impl AccessMap {
             indent += 4;
         }
 
-        // let mut access_code = String::new();
-        // for f in op {
-        //     access_code.push_str(f(self)?.as_str());
-        // }
         let access_lines: Vec<&str> = inner_code.lines().collect();
 
         access_lines.iter().for_each(|line| {

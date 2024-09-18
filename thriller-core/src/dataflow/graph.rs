@@ -4,17 +4,18 @@ use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::dataflow::{ThrillerEdge, ThrillerNode, ThrillerNodeInner};
+use crate::debug;
 use crate::task::Task;
-use crate::{debug, AttachedEdge};
 use crate::{next_id, MemoryLevel, ThrillerResult};
 
 /// Thriller Dataflow Graph structure.
-#[allow(dead_code)]
 #[derive(Default)]
 pub struct ThrillerGraph {
+    #[allow(dead_code)]
     id: usize,
     nodes: Vec<Rc<RefCell<ThrillerNode>>>,
     edges: Vec<Rc<ThrillerEdge>>,
+    #[allow(dead_code)]
     mem_level: MemoryLevel,
 }
 
@@ -94,27 +95,6 @@ impl ThrillerGraph {
 
         sorted_nodes
     }
-
-    /// Reduce the block outputs in the graph.
-    pub fn reduce_block_outputs(&self) -> Option<Vec<Rc<AttachedEdge>>> {
-        let sorted_nodes = self.topo_sort();
-
-        for node in sorted_nodes {
-            if let ThrillerNodeInner::Block(block) = node.borrow().get_inner() {
-                let outputs = block.reduce();
-                let mut reduced_outputs = Vec::new();
-                if let Some(outputs) = outputs {
-                    for output in outputs {
-                        reduced_outputs.push(output.clone());
-                    }
-                    return Some(reduced_outputs);
-                }
-                return None;
-            }
-        }
-
-        None
-    }
 }
 
 impl Task for ThrillerGraph {
@@ -128,19 +108,6 @@ impl Task for ThrillerGraph {
                     code += op.emit()?.as_str();
                 }
                 ThrillerNodeInner::Block(block) => {
-                    // let indent = 4;
-                    // let block_code = block.emit()?;
-                    // let lines = block_code.lines().collect::<Vec<_>>();
-                    // code += "{\n";
-                    // for line in lines {
-                    //     code.push_str(&format!(
-                    //         "{indent}{line}\n",
-                    //         indent = " ".repeat(indent),
-                    //         line = line
-                    //     ));
-                    // }
-                    // code += "}\n";
-
                     code += block.emit()?.as_str();
                 }
                 _ => {}

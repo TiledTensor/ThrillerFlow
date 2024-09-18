@@ -1,7 +1,6 @@
 mod block;
 mod edge;
 mod graph;
-mod loop_analysis;
 mod node;
 
 pub use block::{BlockType, ThrillerBlock};

@@ -18,9 +18,9 @@ if __name__ == '__main__':
     DimB = [256, 256]
     DimC = [256, 256]
 
-    gA = pythriller.create_buffer("gA", DimA, LayoutA, BufTypeA)
-    gB = pythriller.create_buffer("gB", DimB, LayoutB, BufTypeB)
-    gC = pythriller.create_buffer("gC", DimC, LayoutC, BufTypeC)
+    gA = pythriller.PyBuffer("gA", DimA, LayoutA, BufTypeA)
+    gB = pythriller.PyBuffer("gB", DimB, LayoutB, BufTypeB)
+    gC = pythriller.PyBuffer("gC", DimC, LayoutC, BufTypeC)
 
     print(gA)
     print(gB)
