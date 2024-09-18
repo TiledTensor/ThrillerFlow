@@ -54,6 +54,15 @@ if __name__ == '__main__':
 
     GemmNode = pythriller.PyNode.gemm(NodeA, NodeB, NodeAcc)
 
+    LoopIter = pythriller.IterationVar('i', (0, 4))
+
+    access_dims = [1]
+    access_map = [[1]]
+    access_offset = [0]
+
+    AccessMap = pythriller.AccessMap(
+        access_dims, access_map, access_offset, [LoopIter])
+
     EdgeA_Gemm = pythriller.PyEdge(NodeA, GemmNode)
     EdgeB_GEMM = pythriller.PyEdge(NodeB, GemmNode)
     EdgeGemm_Acc = pythriller.PyEdge(GemmNode, NodeAcc)
@@ -63,15 +72,15 @@ if __name__ == '__main__':
 
     RegGraph.connect()
 
-    LoadGlobalToRegEdgeA = pythriller.AttachedEdge(gA, rA)
-    LoadGlobalToRegEdgeB = pythriller.AttachedEdge(gB, rB)
-    StoreRegToGlobalEdgeC = pythriller.AttachedEdge(acc, gC)
+    LoadGlobalToRegEdgeA = pythriller.AttachedEdge(gA, rA, AccessMap)
+    LoadGlobalToRegEdgeB = pythriller.AttachedEdge(gB, rB, AccessMap)
+    StoreRegToGlobalEdgeC = pythriller.AttachedEdge(acc, gC, AccessMap)
     G2RBlockMemLevel = pythriller.PyMemoryLevel.Register
 
     G2RBlockType = pythriller.BlockType.Reduce
 
     GlobalToRegBlock = pythriller.Block(
-        [LoadGlobalToRegEdgeA, LoadGlobalToRegEdgeB], [StoreRegToGlobalEdgeC], G2RBlockMemLevel, RegGraph, G2RBlockType)
+        [LoadGlobalToRegEdgeA, LoadGlobalToRegEdgeB], [StoreRegToGlobalEdgeC], G2RBlockMemLevel, RegGraph, G2RBlockType, [LoopIter])
 
     code = GlobalToRegBlock.codegen()
 

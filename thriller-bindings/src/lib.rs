@@ -1,3 +1,4 @@
+use access::PyAccessMap;
 use pyo3::prelude::*;
 
 use block::{PyAttachedEdge, PyBlock, PyBlockType};
@@ -5,11 +6,14 @@ use buffer::{PyBufType, PyBuffer, PyLayout};
 use graph::{PyEdge, PyGraph, PyMemoryLevel, PyNode};
 use op::PyGemm;
 use thriller_core::initialize;
+use var::PyIterationVar;
 
+mod access;
 mod block;
 mod buffer;
 mod graph;
 mod op;
+mod var;
 
 #[pyfunction]
 fn initialize_thriller_flow() -> PyResult<()> {
@@ -37,6 +41,10 @@ fn thriller_flow(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyBlock>()?;
     m.add_class::<PyAttachedEdge>()?;
     m.add_class::<PyBlockType>()?;
+
+    m.add_class::<PyIterationVar>()?;
+
+    m.add_class::<PyAccessMap>()?;
 
     Ok(())
 }

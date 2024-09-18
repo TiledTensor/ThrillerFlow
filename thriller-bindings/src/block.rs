@@ -5,8 +5,10 @@ use thriller_core::{AttachedEdge, BlockType, MemoryLevel, Task, ThrillerBlock};
 use pyo3::{prelude::*, types::PyList};
 
 use crate::{
+    access::PyAccessMap,
     buffer::PyBuffer,
     graph::{PyGraph, PyMemoryLevel},
+    var::PyIterationVar,
 };
 
 #[pyclass(module = "block", name = "BlockType")]
@@ -30,6 +32,7 @@ impl PyBlock {
         mem_level: PyRef<PyMemoryLevel>,
         subgraph: PyRef<PyGraph>,
         block_type: PyRef<PyBlockType>,
+        ivars: &Bound<PyList>,
     ) -> PyResult<Self> {
         let mem_level = match *mem_level {
             PyMemoryLevel::Register => MemoryLevel::Register,
@@ -60,9 +63,18 @@ impl PyBlock {
             })
             .collect::<Vec<_>>();
 
+        let ivars = ivars
+            .into_iter()
+            .map(|ivar| {
+                // TODO(KuangjuX): fix `unwarp()`.
+                let ivar = ivar.extract::<PyRef<PyIterationVar>>().unwrap();
+                Rc::clone(&ivar.0)
+            })
+            .collect::<Vec<_>>();
+
         let subgraph = Rc::clone(&subgraph.0);
 
-        let block = ThrillerBlock::new(inputs, outputs, mem_level, subgraph, block_type);
+        let block = ThrillerBlock::new(inputs, outputs, mem_level, subgraph, block_type, ivars);
 
         Ok(PyBlock(block))
     }
@@ -77,9 +89,10 @@ impl PyBlock {
 #[pymethods]
 impl PyAttachedEdge {
     #[new]
-    fn new(src: PyRef<PyBuffer>, dst: PyRef<PyBuffer>) -> Self {
+    fn new(src: PyRef<PyBuffer>, dst: PyRef<PyBuffer>, map: PyRef<PyAccessMap>) -> Self {
         let src = Rc::clone(&src.0);
         let dst = Rc::clone(&dst.0);
-        PyAttachedEdge(Rc::new(AttachedEdge::new(src, dst, None)))
+        let map = Rc::clone(&map.0);
+        PyAttachedEdge(Rc::new(AttachedEdge::new(src, dst, Some(map))))
     }
 }
