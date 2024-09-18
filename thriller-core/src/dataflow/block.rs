@@ -98,7 +98,13 @@ impl ThrillerBlock {
         let mut code = String::new();
         let indent = " ".repeat(self.ivars.len() * 4);
 
+        let mut insert_copy_async = false;
+        let mut insert_syncthreads = false;
+
         for edge in self.inputs.iter() {
+            // Insert `syncthreads()` when loading tiles.
+            insert_syncthreads = true;
+
             let sbuf = &edge.src;
             let dbuf = &edge.dst;
 
@@ -128,9 +134,41 @@ impl ThrillerBlock {
                     .as_str();
                 }
 
+                (BufType::SharedTile, BufType::RegTile) => {
+                    insert_copy_async = true;
+                    code += format!(
+                        "{indent}loader_tile_s2r_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        indent = indent,
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
                 _ => todo!(),
             }
         }
+
+        if insert_copy_async {
+            code += format!(
+                "{indent}{copy_async}",
+                indent = indent,
+                copy_async = Sync::emit_copy_async()
+            )
+            .as_str();
+        }
+
+        if insert_syncthreads {
+            code += format!(
+                "{indent}{syncthreads}",
+                indent = indent,
+                syncthreads = Sync::emit_sync()
+            )
+            .as_str();
+        }
+
         Ok(code)
     }
 

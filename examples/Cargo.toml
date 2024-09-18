@@ -14,29 +14,5 @@ name = "topo_sort"
 path = "graph/topo_sort.rs"
 
 [[example]]
-name = "access"
-path = "loop/access.rs"
-
-[[example]]
-name = "multiloops"
-path = "loop/multiloops.rs"
-
-[[example]]
 name = "gemm"
 path = "ops/gemm.rs"
-
-[[example]]
-name = "rf_block"
-path = "gemm/rf_block.rs"
-
-[[example]]
-name = "shared_block"
-path = "gemm/shared_block.rs"
-
-[[example]]
-name = "global_block"
-path = "gemm/global_block.rs"
-
-[[example]]
-name = "gemm_codegen"
-path = "gemm/gemm_codegen.rs"

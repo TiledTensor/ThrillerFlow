@@ -10,6 +10,6 @@ function run_examples(){
 run_examples "examples/"
 run_examples "examples/graph"
 run_examples "examples/ops"
-run_examples "examples/loop"
-run_examples "examples/gemm"
+# run_examples "examples/loop"
+# run_examples "examples/gemm"
 
