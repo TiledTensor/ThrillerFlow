@@ -77,10 +77,8 @@ if __name__ == '__main__':
     StoreRegToGlobalEdgeC = pythriller.AttachedEdge(acc, gC, AccessMap)
     G2RBlockMemLevel = pythriller.PyMemoryLevel.Register
 
-    G2RBlockType = pythriller.BlockType.Reduce
-
     GlobalToRegBlock = pythriller.Block(
-        [LoadGlobalToRegEdgeA, LoadGlobalToRegEdgeB], [StoreRegToGlobalEdgeC], RegGraph, G2RBlockType, [LoopIter])
+        [LoadGlobalToRegEdgeA, LoadGlobalToRegEdgeB], [StoreRegToGlobalEdgeC], RegGraph, [LoopIter])
 
     code = GlobalToRegBlock.codegen()
 

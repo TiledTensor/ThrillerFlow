@@ -1,16 +1,10 @@
 use std::rc::Rc;
 
-use thriller_core::{AttachedEdge, BlockType, Task, ThrillerBlock};
+use thriller_core::{AttachedEdge, Task, ThrillerBlock};
 
 use pyo3::{prelude::*, types::PyList};
 
 use crate::{access::PyAccessMap, buffer::PyBuffer, graph::PyGraph, var::PyIterationVar};
-
-#[pyclass(module = "block", name = "BlockType")]
-pub enum PyBlockType {
-    Reduce,
-    Map,
-}
 
 #[pyclass(unsendable, module = "block", name = "Block")]
 pub struct PyBlock(pub ThrillerBlock);
@@ -25,14 +19,8 @@ impl PyBlock {
         inputs: &Bound<PyList>,
         outputs: &Bound<PyList>,
         subgraph: PyRef<PyGraph>,
-        block_type: PyRef<PyBlockType>,
         ivars: &Bound<PyList>,
     ) -> PyResult<Self> {
-        let block_type = match *block_type {
-            PyBlockType::Reduce => BlockType::Reduce,
-            PyBlockType::Map => BlockType::Map,
-        };
-
         let inputs = inputs
             .into_iter()
             .map(|edge| {
@@ -62,7 +50,7 @@ impl PyBlock {
 
         let subgraph = Rc::clone(&subgraph.0);
 
-        let block = ThrillerBlock::new(inputs, outputs, subgraph, block_type, ivars);
+        let block = ThrillerBlock::new(inputs, outputs, subgraph, ivars);
 
         Ok(PyBlock(block))
     }

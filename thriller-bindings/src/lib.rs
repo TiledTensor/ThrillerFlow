@@ -1,7 +1,7 @@
 use access::PyAccessMap;
 use pyo3::prelude::*;
 
-use block::{PyAttachedEdge, PyBlock, PyBlockType};
+use block::{PyAttachedEdge, PyBlock};
 use buffer::{PyBufType, PyBuffer, PyLayout};
 use graph::{PyEdge, PyGraph, PyMemoryLevel, PyNode};
 use op::PyGemm;
@@ -40,7 +40,6 @@ fn thriller_flow(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<PyBlock>()?;
     m.add_class::<PyAttachedEdge>()?;
-    m.add_class::<PyBlockType>()?;
 
     m.add_class::<PyIterationVar>()?;
 

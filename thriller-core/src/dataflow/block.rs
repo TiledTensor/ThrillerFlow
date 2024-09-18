@@ -9,22 +9,12 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, BufType, IterationBound, IterationVar};
 
-#[derive(PartialEq, Clone, Copy)]
-/// A map relation from inputs into outputs.
-pub enum BlockType {
-    /// Map: one to one
-    Map,
-    /// Reduce: many to one
-    Reduce,
-}
-
 /// A Thriller Dataflow Block representing a memory level subgraph.
 pub struct ThrillerBlock {
     id: usize,
     pub(crate) inputs: Vec<Rc<AttachedEdge>>,
     pub(crate) outputs: Vec<Rc<AttachedEdge>>,
     pub(crate) subgraph: Rc<RefCell<ThrillerGraph>>,
-    pub(crate) block_type: BlockType,
     pub(crate) ivars: Vec<Rc<IterationVar>>,
 }
 
@@ -34,22 +24,15 @@ impl ThrillerBlock {
         inputs: Vec<Rc<AttachedEdge>>,
         outputs: Vec<Rc<AttachedEdge>>,
         subgraph: Rc<RefCell<ThrillerGraph>>,
-        block_type: BlockType,
         ivars: Vec<Rc<IterationVar>>,
     ) -> Self {
         ThrillerBlock {
             inputs,
             outputs,
             subgraph,
-            block_type,
             ivars,
             id: next_id(),
         }
-    }
-
-    /// Get the block type.
-    pub fn get_block_type(&self) -> BlockType {
-        self.block_type
     }
 
     fn emit_loop(&self) -> ThrillerResult<String> {
@@ -220,6 +203,7 @@ impl ThrillerBlock {
         Ok(code)
     }
 
+    /// Emit loop nest program based on [`ThrillerBlock`].
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();
 
