@@ -7,7 +7,7 @@ use crate::error::{ThrillerError, ThrillerResult};
 use crate::kernels::sync::Sync;
 use crate::task::Task;
 use crate::var::Var;
-use crate::{next_id, BufType, IterationBound, IterationVar, MemoryLevel};
+use crate::{next_id, BufType, IterationBound, IterationVar};
 
 #[derive(PartialEq, Clone, Copy)]
 /// A map relation from inputs into outputs.
@@ -23,7 +23,6 @@ pub struct ThrillerBlock {
     id: usize,
     pub(crate) inputs: Vec<Rc<AttachedEdge>>,
     pub(crate) outputs: Vec<Rc<AttachedEdge>>,
-    pub(crate) mem_level: MemoryLevel,
     pub(crate) subgraph: Rc<RefCell<ThrillerGraph>>,
     pub(crate) block_type: BlockType,
     pub(crate) ivars: Vec<Rc<IterationVar>>,
@@ -34,7 +33,6 @@ impl ThrillerBlock {
     pub fn new(
         inputs: Vec<Rc<AttachedEdge>>,
         outputs: Vec<Rc<AttachedEdge>>,
-        mem_level: MemoryLevel,
         subgraph: Rc<RefCell<ThrillerGraph>>,
         block_type: BlockType,
         ivars: Vec<Rc<IterationVar>>,
@@ -42,7 +40,6 @@ impl ThrillerBlock {
         ThrillerBlock {
             inputs,
             outputs,
-            mem_level,
             subgraph,
             block_type,
             ivars,
@@ -179,78 +176,78 @@ impl ThrillerBlock {
         Ok(code)
     }
 
-    /// Generate load code for the block inputs.
-    #[allow(dead_code)]
-    fn gen_load(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
-        // TODO: This is not a final version of the load code generation. It is just a pseudocode representation of the formalized data flow.
-        let mut code = String::new();
-        // Generate load inputs.
+    // /// Generate load code for the block inputs.
+    // #[allow(dead_code)]
+    // fn gen_load(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
+    //     // TODO: This is not a final version of the load code generation. It is just a pseudocode representation of the formalized data flow.
+    //     let mut code = String::new();
+    //     // Generate load inputs.
 
-        match self.mem_level {
-            MemoryLevel::Register => {
-                let access_map = edge
-                    .get_access()
-                    .as_ref()
-                    .ok_or(ThrillerError::MissingAccessMap)?;
+    //     match self.mem_level {
+    //         MemoryLevel::Register => {
+    //             let access_map = edge
+    //                 .get_access()
+    //                 .as_ref()
+    //                 .ok_or(ThrillerError::MissingAccessMap)?;
 
-                let loop_depth = access_map.get_loop_depth();
-                if loop_depth != 1 {
-                    return Err(ThrillerError::InvalidLoadAccess);
-                }
+    //             let loop_depth = access_map.get_loop_depth();
+    //             if loop_depth != 1 {
+    //                 return Err(ThrillerError::InvalidLoadAccess);
+    //             }
 
-                let offsets = access_map.get_access_offsets();
-                let matrixs = access_map.get_access_matrixs();
+    //             let offsets = access_map.get_access_offsets();
+    //             let matrixs = access_map.get_access_matrixs();
 
-                let iter_vars = access_map.get_iter_vars();
+    //             let iter_vars = access_map.get_iter_vars();
 
-                code.push_str(&format!(
-                        "copy_2d_tile_s2r({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
-                        src = edge.get_src_name(),
-                        src_access = matrixs[0].0[0][0],
-                        src_offset = offsets[0].0[0],
-                        src_index = iter_vars[0].get_name(),
-                        dst = edge.get_dst_name(),
-                        dst_index = iter_vars[0].get_name(),
-                        dst_offset = offsets[1].0[0],
-                        dst_access = matrixs[1].0[0][0]
-                    ));
-            }
+    //             code.push_str(&format!(
+    //                     "copy_2d_tile_s2r({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
+    //                     src = edge.get_src_name(),
+    //                     src_access = matrixs[0].0[0][0],
+    //                     src_offset = offsets[0].0[0],
+    //                     src_index = iter_vars[0].get_name(),
+    //                     dst = edge.get_dst_name(),
+    //                     dst_index = iter_vars[0].get_name(),
+    //                     dst_offset = offsets[1].0[0],
+    //                     dst_access = matrixs[1].0[0][0]
+    //                 ));
+    //         }
 
-            MemoryLevel::Shared => {
-                let access_map = edge
-                    .get_access()
-                    .as_ref()
-                    .ok_or(ThrillerError::MissingAccessMap)?;
+    //         MemoryLevel::Shared => {
+    //             let access_map = edge
+    //                 .get_access()
+    //                 .as_ref()
+    //                 .ok_or(ThrillerError::MissingAccessMap)?;
 
-                let loop_depth = access_map.get_loop_depth();
-                if loop_depth != 1 {
-                    return Err(ThrillerError::InvalidLoadAccess);
-                }
+    //             let loop_depth = access_map.get_loop_depth();
+    //             if loop_depth != 1 {
+    //                 return Err(ThrillerError::InvalidLoadAccess);
+    //             }
 
-                let offsets = access_map.get_access_offsets();
-                let matrixs = access_map.get_access_matrixs();
+    //             let offsets = access_map.get_access_offsets();
+    //             let matrixs = access_map.get_access_matrixs();
 
-                let iter_vars = access_map.get_iter_vars();
+    //             let iter_vars = access_map.get_iter_vars();
 
-                code.push_str(&format!(
-                        "copy_2d_tile_g2s({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
-                        src = edge.get_src_name(),
-                        src_access = matrixs[0].0[0][0],
-                        src_offset = offsets[0].0[0],
-                        src_index = iter_vars[0].get_name(),
-                        dst = edge.get_dst_name(),
-                        dst_index = iter_vars[0].get_name(),
-                        dst_offset = offsets[1].0[0],
-                        dst_access = matrixs[1].0[0][0]
-                    ));
-            }
+    //             code.push_str(&format!(
+    //                     "copy_2d_tile_g2s({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
+    //                     src = edge.get_src_name(),
+    //                     src_access = matrixs[0].0[0][0],
+    //                     src_offset = offsets[0].0[0],
+    //                     src_index = iter_vars[0].get_name(),
+    //                     dst = edge.get_dst_name(),
+    //                     dst_index = iter_vars[0].get_name(),
+    //                     dst_offset = offsets[1].0[0],
+    //                     dst_access = matrixs[1].0[0][0]
+    //                 ));
+    //         }
 
-            MemoryLevel::Global => {
-                unimplemented!();
-            }
-        }
-        Ok(code)
-    }
+    //         MemoryLevel::Global => {
+    //             unimplemented!();
+    //         }
+    //     }
+    //     Ok(code)
+    // }
 
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();

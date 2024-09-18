@@ -4,12 +4,7 @@ use thriller_core::{AttachedEdge, BlockType, MemoryLevel, Task, ThrillerBlock};
 
 use pyo3::{prelude::*, types::PyList};
 
-use crate::{
-    access::PyAccessMap,
-    buffer::PyBuffer,
-    graph::{PyGraph, PyMemoryLevel},
-    var::PyIterationVar,
-};
+use crate::{access::PyAccessMap, buffer::PyBuffer, graph::PyGraph, var::PyIterationVar};
 
 #[pyclass(module = "block", name = "BlockType")]
 pub enum PyBlockType {
@@ -29,17 +24,10 @@ impl PyBlock {
     fn new(
         inputs: &Bound<PyList>,
         outputs: &Bound<PyList>,
-        mem_level: PyRef<PyMemoryLevel>,
         subgraph: PyRef<PyGraph>,
         block_type: PyRef<PyBlockType>,
         ivars: &Bound<PyList>,
     ) -> PyResult<Self> {
-        let mem_level = match *mem_level {
-            PyMemoryLevel::Register => MemoryLevel::Register,
-            PyMemoryLevel::Shared => MemoryLevel::Shared,
-            PyMemoryLevel::Global => MemoryLevel::Global,
-        };
-
         let block_type = match *block_type {
             PyBlockType::Reduce => BlockType::Reduce,
             PyBlockType::Map => BlockType::Map,
@@ -74,7 +62,7 @@ impl PyBlock {
 
         let subgraph = Rc::clone(&subgraph.0);
 
-        let block = ThrillerBlock::new(inputs, outputs, mem_level, subgraph, block_type, ivars);
+        let block = ThrillerBlock::new(inputs, outputs, subgraph, block_type, ivars);
 
         Ok(PyBlock(block))
     }

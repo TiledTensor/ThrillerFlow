@@ -80,7 +80,7 @@ if __name__ == '__main__':
     G2RBlockType = pythriller.BlockType.Reduce
 
     GlobalToRegBlock = pythriller.Block(
-        [LoadGlobalToRegEdgeA, LoadGlobalToRegEdgeB], [StoreRegToGlobalEdgeC], G2RBlockMemLevel, RegGraph, G2RBlockType, [LoopIter])
+        [LoadGlobalToRegEdgeA, LoadGlobalToRegEdgeB], [StoreRegToGlobalEdgeC], RegGraph, G2RBlockType, [LoopIter])
 
     code = GlobalToRegBlock.codegen()
 
