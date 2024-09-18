@@ -1,6 +1,7 @@
 use crate::{next_id, Var};
 
 /// A regular variable.
+#[derive(Clone)]
 pub struct RegularVar {
     name: String,
     id: usize,

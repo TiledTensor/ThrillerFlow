@@ -47,32 +47,6 @@ impl AttachedEdge {
     pub fn replace_access_map(&mut self, access: Rc<AccessMap>) {
         self.access = Some(access);
     }
-
-    pub(crate) fn check_loop_equal(&self, other: &AttachedEdge) -> bool {
-        if let (Some(this), Some(other)) = (self.get_access(), other.get_access()) {
-            // Check `loop_depth` is the same.
-            if this.get_loop_depth() != other.get_loop_depth() {
-                return false;
-            }
-            // Check if iter_vars are the same.
-            if this.get_iter_vars().len() != other.get_iter_vars().len() {
-                return false;
-            }
-
-            for (this_iter_var, other_iter_var) in this
-                .get_iter_vars()
-                .iter()
-                .zip(other.get_iter_vars().iter())
-            {
-                if this_iter_var.get_id() != other_iter_var.get_id() {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        false
-    }
 }
 
 /// `ThrillerEdge` repersent load/store in dataflow graph.

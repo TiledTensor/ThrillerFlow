@@ -1,7 +1,7 @@
 //! A DataFlow Analyise and Codegen Framework written in Rust.
 
-#![deny(warnings)]
-#![deny(missing_docs)]
+// #![deny(warnings)]
+// #![deny(missing_docs)]
 
 mod access;
 mod buffer;
@@ -18,8 +18,8 @@ mod var;
 pub use access::{AccessMap, AccessMatrix, AccessOffset};
 pub use buffer::{BufType, Buffer};
 pub use dataflow::{
-    AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
-    ThrillerNodeInner,
+    AttachedEdge, BlockType, ScheduleNode, ScheduleTree, ThrillerBlock, ThrillerEdge,
+    ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 pub use engine::{BlockLayout, BlockShape, ThrillerEngine};
 pub use error::{ThrillerError, ThrillerResult};

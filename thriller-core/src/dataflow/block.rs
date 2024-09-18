@@ -4,13 +4,10 @@ use std::vec::Vec;
 
 use crate::dataflow::{AttachedEdge, ThrillerGraph};
 use crate::error::{ThrillerError, ThrillerResult};
+use crate::kernels::sync::Sync;
 use crate::task::Task;
 use crate::var::Var;
-use crate::{next_id, AccessMap, MemoryLevel};
-
-use crate::kernels::sync::Sync;
-
-use super::loop_analysis::LoopGroup;
+use crate::{next_id, BufType, IterationBound, IterationVar, MemoryLevel};
 
 #[derive(PartialEq, Clone, Copy)]
 /// A map relation from inputs into outputs.
@@ -29,8 +26,7 @@ pub struct ThrillerBlock {
     pub(crate) mem_level: MemoryLevel,
     pub(crate) subgraph: Rc<RefCell<ThrillerGraph>>,
     pub(crate) block_type: BlockType,
-    pub(crate) unified_access_map: Option<Rc<AccessMap>>,
-    pub(crate) loop_groups: Vec<LoopGroup>,
+    pub(crate) ivars: Vec<Rc<IterationVar>>,
 }
 
 impl ThrillerBlock {
@@ -41,6 +37,7 @@ impl ThrillerBlock {
         mem_level: MemoryLevel,
         subgraph: Rc<RefCell<ThrillerGraph>>,
         block_type: BlockType,
+        ivars: Vec<Rc<IterationVar>>,
     ) -> Self {
         ThrillerBlock {
             inputs,
@@ -48,9 +45,8 @@ impl ThrillerBlock {
             mem_level,
             subgraph,
             block_type,
+            ivars,
             id: next_id(),
-            unified_access_map: None,
-            loop_groups: vec![],
         }
     }
 
@@ -59,39 +55,133 @@ impl ThrillerBlock {
         self.block_type
     }
 
-    /// Merge the same access maps into a unified access map.
-    pub fn merge_access_map(&mut self) {
-        // Iterate over the inputs and check if the access maps are the same.
-        // If they are the same, then we can merge them into a unified access map.
-
-        // TODO: Implement this function.
-
-        self.merge_loops();
-        if self.loop_groups.len() == 1 {
-            self.unified_access_map = Some(self.inputs[0].get_access().as_ref().unwrap().clone());
-        } else {
-            self.unified_access_map = None;
-        }
-    }
-
-    pub(crate) fn get_inputs(&self) -> &Vec<Rc<AttachedEdge>> {
-        &self.inputs
-    }
-
-    pub(crate) fn gen_loop_load(&self) -> ThrillerResult<String> {
+    fn emit_loop(&self) -> ThrillerResult<String> {
         let mut code = String::new();
 
+        let mut indent = 0;
+
+        // Generate loop.
+        for ivar in self.ivars.iter() {
+            let (upper, lower) = ivar.get_domain();
+
+            code += match (upper, lower) {
+                (IterationBound::Fixed(upper), IterationBound::Fixed(lower)) => {
+                    format!(
+                        "{indent}for(int {ivar} = {lower}; {ivar} < {upper}; {ivar}++){{\n",
+                        indent = " ".repeat(indent),
+                        ivar = ivar.get_name(),
+                        lower = lower,
+                        upper = upper
+                    )
+                }
+
+                _ => todo!(),
+            }
+            .as_str();
+
+            indent += 4;
+        }
+
+        Ok(code)
+    }
+
+    fn emit_loop_closure(&self) -> ThrillerResult<String> {
+        let mut indent = ((self.ivars.len() - 1) * 4) as isize;
+        let mut code = String::new();
+
+        while indent >= 0 {
+            code += format!("{indent}}}\n", indent = " ".repeat(indent as usize)).as_str();
+            indent -= 4;
+        }
+
+        Ok(code)
+    }
+
+    fn emit_load(&self) -> ThrillerResult<String> {
+        let mut code = String::new();
+        let indent = " ".repeat(self.ivars.len() * 4);
+
         for edge in self.inputs.iter() {
-            if edge.get_access().is_some() {
-                // TODO: Add access pattern support for load operation.
-                code += self.gen_load(edge)?.as_str();
+            let sbuf = &edge.src;
+            let dbuf = &edge.dst;
+            let access_map = edge
+                .get_access()
+                .as_ref()
+                .ok_or(ThrillerError::MissingAccessMap)?;
+
+            let sbuf_var = sbuf.get_name();
+            let dbuf_var = dbuf.get_name();
+
+            let sbuf_id = sbuf.get_id();
+            let dbuf_id = dbuf.get_id();
+
+            match (sbuf.get_typing(), dbuf.get_typing()) {
+                (BufType::GlobalTile, BufType::RegTile) => {
+                    code += format!(
+                        "{indent}loader_tile_g2r_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        indent = indent,
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
+                _ => todo!(),
             }
         }
         Ok(code)
     }
 
+    fn emit_store(&self) -> ThrillerResult<String> {
+        let mut code = String::new();
+
+        for edge in self.outputs.iter() {
+            let sbuf = &edge.src;
+            let dbuf = &edge.dst;
+            let access_map = edge
+                .get_access()
+                .as_ref()
+                .ok_or(ThrillerError::MissingAccessMap)?;
+
+            let sbuf_var = sbuf.get_name();
+            let dbuf_var = dbuf.get_name();
+
+            let sbuf_id = sbuf.get_id();
+            let dbuf_id = dbuf.get_id();
+
+            match (sbuf.get_typing(), dbuf.get_typing()) {
+                (BufType::RegTile, BufType::GlobalTile) => {
+                    code += format!(
+                        "storer_tile_r2g_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
+                _ => todo!(),
+            }
+        }
+
+        Ok(code)
+    }
+
+    fn emit_sync(&self) -> ThrillerResult<String> {
+        let mut code = String::new();
+
+        // TODO(KuangjuX): Check Memory Hiercary and insert sync primitive.
+        code += Sync::emit_sync().as_str();
+
+        Ok(code)
+    }
+
     /// Generate load code for the block inputs.
-    pub(crate) fn gen_load(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
+    #[allow(dead_code)]
+    fn gen_load(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
         // TODO: This is not a final version of the load code generation. It is just a pseudocode representation of the formalized data flow.
         let mut code = String::new();
         // Generate load inputs.
@@ -162,111 +252,27 @@ impl ThrillerBlock {
         Ok(code)
     }
 
-    pub(crate) fn emit_store(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
-        let mut code = String::new();
-        if self.block_type == BlockType::Reduce {
-            return Ok(code);
-        }
-        // Generate store outputs.
-        match self.block_type {
-            BlockType::Map => match self.mem_level {
-                MemoryLevel::Register => {
-                    code.push_str(&format!(
-                        "copy_2d_tile_r2s({}, {});\n",
-                        edge.get_src_name(),
-                        edge.get_dst_name()
-                    ));
-                }
-
-                MemoryLevel::Shared => {
-                    code.push_str(&format!(
-                        "copy_2d_tile_s2g({}, {});\n",
-                        edge.get_src_name(),
-                        edge.get_dst_name()
-                    ));
-                }
-
-                _ => {}
-            },
-
-            BlockType::Reduce => {}
-        }
-        Ok(code)
-    }
-
-    /// Generate store code for the block outputs.
-    pub(crate) fn gen_store(&self) -> ThrillerResult<String> {
-        let mut code = String::new();
-        if self.block_type == BlockType::Reduce {
-            return Ok(code);
-        }
-        for edge in self.outputs.iter() {
-            code += &self.emit_store(edge)?;
-        }
-        Ok(code)
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn reduce(&self) -> Option<&Vec<Rc<AttachedEdge>>> {
-        match self.block_type {
-            BlockType::Reduce => Some(&self.outputs),
-            _ => None,
-        }
-    }
-
-    #[allow(dead_code)]
-    pub(crate) fn split_subgraph(&mut self) {
-        unimplemented!()
-    }
-
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();
-        if let Some(access_map) = &self.unified_access_map {
-            let mut inner_code = String::new();
 
-            inner_code += &self.gen_loop_load()?;
-            inner_code += Sync::emit_sync().as_str();
-            if self.mem_level == MemoryLevel::Shared {
-                inner_code += Sync::emit_copy_async().as_str();
-            }
-            inner_code += self.subgraph.borrow().emit()?.as_str();
-            code += access_map.gen_loop_access(inner_code)?.as_str();
+        code += self.emit_loop()?.as_str();
+        let indent = " ".repeat(self.ivars.len() * 4);
 
-            code += Sync::emit_sync().as_str();
-            if let Some(reduce_outputs) = self.subgraph.borrow().reduce_block_outputs() {
-                // self.outputs.extend(reduce_outputs);
-                for output in reduce_outputs {
-                    code += &self.emit_store(&output)?;
-                }
-            }
+        code += self.emit_load()?.as_str();
 
-            code += &self.gen_store()?;
-            Ok(code)
-        } else {
-            // TODO: Handle cases without an unified access map.
-            if self.inputs.is_empty() && self.outputs.is_empty() {
-                let code = self.subgraph.borrow().emit()?;
-                Ok(code)
-            } else {
-                // unimplemented!();
-                let mut code = String::new();
-                for group in self.loop_groups.iter() {
-                    let edges = &group.edges;
-                    let mut inner_code = String::new();
+        let subgraph_code = self.subgraph.borrow().emit()?;
 
-                    for edge in edges.iter() {
-                        inner_code += &self.gen_load(edge)?;
-                    }
-
-                    let access_map = group.edges[0].get_access().as_ref().unwrap();
-                    code += access_map.gen_loop_access(inner_code)?.as_str();
-                }
-
-                // TODO: Add codegen for subgraph and split subgraph into different loops.
-
-                Ok(code)
-            }
+        for line in subgraph_code.lines() {
+            code += format!("{indent}{line}\n", indent = indent, line = line).as_str()
         }
+
+        code += self.emit_loop_closure()?.as_str();
+
+        code += self.emit_sync()?.as_str();
+
+        code += self.emit_store()?.as_str();
+
+        Ok(code)
     }
 }
 
