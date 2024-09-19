@@ -69,6 +69,6 @@ impl PyAttachedEdge {
         let src = Rc::clone(&src.0);
         let dst = Rc::clone(&dst.0);
         let map = Rc::clone(&map.0);
-        PyAttachedEdge(Rc::new(AttachedEdge::new(src, dst, Some(map))))
+        PyAttachedEdge(Rc::new(AttachedEdge::new(src, dst, map)))
     }
 }

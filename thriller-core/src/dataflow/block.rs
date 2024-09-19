@@ -3,7 +3,7 @@ use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::dataflow::{AttachedEdge, ThrillerGraph};
-use crate::error::{ThrillerError, ThrillerResult};
+use crate::error::ThrillerResult;
 use crate::kernels::sync::Sync;
 use crate::task::Task;
 use crate::var::Var;
@@ -97,11 +97,6 @@ impl ThrillerBlock {
             let dbuf = &edge.dst;
 
             // TODO(KuangjuX): Support Access Memory code generation.
-            #[allow(unused_variables)]
-            let access_map = edge
-                .get_access()
-                .as_ref()
-                .ok_or(ThrillerError::MissingAccessMap)?;
 
             let sbuf_var = sbuf.get_name();
             let dbuf_var = dbuf.get_name();
@@ -168,11 +163,6 @@ impl ThrillerBlock {
             let dbuf = &edge.dst;
 
             // TODO(KuangjuX): Support Access Memory code generation.
-            #[allow(unused_variables)]
-            let access_map = edge
-                .get_access()
-                .as_ref()
-                .ok_or(ThrillerError::MissingAccessMap)?;
 
             let sbuf_var = sbuf.get_name();
             let dbuf_var = dbuf.get_name();

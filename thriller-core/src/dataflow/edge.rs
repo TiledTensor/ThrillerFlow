@@ -33,12 +33,12 @@ pub struct AttachedEdge {
     pub(crate) id: usize,
     pub(crate) src: Rc<Buffer>,
     pub(crate) dst: Rc<Buffer>,
-    pub(crate) access: Option<Rc<AccessMap>>,
+    pub(crate) access: Rc<AccessMap>,
 }
 
 impl AttachedEdge {
     /// Create a new `AttachedEdge` with the given source and destination buffers.
-    pub fn new(src: Rc<Buffer>, dst: Rc<Buffer>, access: Option<Rc<AccessMap>>) -> Self {
+    pub fn new(src: Rc<Buffer>, dst: Rc<Buffer>, access: Rc<AccessMap>) -> Self {
         AttachedEdge {
             id: next_id(),
             src,
@@ -58,14 +58,16 @@ impl AttachedEdge {
     }
 
     /// Get the access pattern of the edge.
-    pub fn get_access(&self) -> &Option<Rc<AccessMap>> {
+    pub fn get_access(&self) -> &Rc<AccessMap> {
         &self.access
     }
 
-    /// Replace the access pattern of the edge.
-    pub fn replace_access_map(&mut self, access: Rc<AccessMap>) {
-        self.access = Some(access);
-    }
+    // /// Emit the source access of the edge.
+    // pub fn emit_source_access(&self) -> ThrillerResult<Vec<String>> {
+    //     let mut access = vec![];
+
+    //     Ok(access)
+    // }
 }
 
 /// `ThrillerEdge` repersent load/store in dataflow graph.
