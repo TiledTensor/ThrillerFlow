@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use thriller_core::{
     initialize, AccessMap, AccessMatrix, AccessOffset, Gemm, IterationBound, IterationVar,
-    MemoryLevel, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
+    ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 
 use thriller_utils::BufBuilder;
@@ -31,7 +31,7 @@ fn main() {
 
     let access_map = Rc::new(access_map);
 
-    let mut subgraph = ThrillerGraph::new(MemoryLevel::Register);
+    let mut subgraph = ThrillerGraph::new();
 
     let r_a_node = Rc::new(RefCell::new(ThrillerNode::new(ThrillerNodeInner::Buffer(
         r_a.clone(),
