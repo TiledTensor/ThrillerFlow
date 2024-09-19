@@ -3,28 +3,23 @@ use std::rc::Rc;
 use std::vec::Vec;
 
 use crate::dataflow::{AttachedEdge, ThrillerGraph};
-use crate::error::{ThrillerError, ThrillerResult};
+use crate::error::ThrillerResult;
 use crate::kernels::sync::Sync;
 use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, BufType, IterationBound, IterationVar};
 
-#[derive(PartialEq, Clone, Copy)]
-/// A map relation from inputs into outputs.
-pub enum BlockType {
-    /// Map: one to one
-    Map,
-    /// Reduce: many to one
-    Reduce,
-}
-
-/// A Thriller Dataflow Block representing a memory level subgraph.
+/// [`ThrillerBlock`] represents the data-parallel repetition of a
+/// dataflow task int form of a d-dimensional dataflow node.
+///
+/// A [`ThrillerBlock`] contains a d-dimensional nested loop with the input [`AttachedEdge`]
+/// and output [`AttachedEdge`] representing tiling load and store operations,
+/// while the subgraph represents the computation operations within the nested loops.
 pub struct ThrillerBlock {
     id: usize,
     pub(crate) inputs: Vec<Rc<AttachedEdge>>,
     pub(crate) outputs: Vec<Rc<AttachedEdge>>,
     pub(crate) subgraph: Rc<RefCell<ThrillerGraph>>,
-    pub(crate) block_type: BlockType,
     pub(crate) ivars: Vec<Rc<IterationVar>>,
 }
 
@@ -34,22 +29,15 @@ impl ThrillerBlock {
         inputs: Vec<Rc<AttachedEdge>>,
         outputs: Vec<Rc<AttachedEdge>>,
         subgraph: Rc<RefCell<ThrillerGraph>>,
-        block_type: BlockType,
         ivars: Vec<Rc<IterationVar>>,
     ) -> Self {
         ThrillerBlock {
             inputs,
             outputs,
             subgraph,
-            block_type,
             ivars,
             id: next_id(),
         }
-    }
-
-    /// Get the block type.
-    pub fn get_block_type(&self) -> BlockType {
-        self.block_type
     }
 
     fn emit_loop(&self) -> ThrillerResult<String> {
@@ -109,11 +97,6 @@ impl ThrillerBlock {
             let dbuf = &edge.dst;
 
             // TODO(KuangjuX): Support Access Memory code generation.
-            #[allow(unused_variables)]
-            let access_map = edge
-                .get_access()
-                .as_ref()
-                .ok_or(ThrillerError::MissingAccessMap)?;
 
             let sbuf_var = sbuf.get_name();
             let dbuf_var = dbuf.get_name();
@@ -121,15 +104,39 @@ impl ThrillerBlock {
             let sbuf_id = sbuf.get_id();
             let dbuf_id = dbuf.get_id();
 
+            let source_access_code = edge.emit_source_access()?.iter().enumerate().fold(
+                String::new(),
+                |acc, (index, access)| {
+                    if index == 0 {
+                        access.to_string()
+                    } else {
+                        format!("{acc}, {access}", acc = acc, access = access)
+                    }
+                },
+            );
+
+            let target_access_code = edge.emit_target_access()?.iter().enumerate().fold(
+                String::new(),
+                |acc, (index, access)| {
+                    if index == 0 {
+                        access.to_string()
+                    } else {
+                        format!("{acc}, {access}", acc = acc, access = access)
+                    }
+                },
+            );
+
             match (sbuf.get_typing(), dbuf.get_typing()) {
                 (BufType::GlobalTile, BufType::RegTile) => {
                     code += format!(
-                        "{indent}loader_tile_g2r_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        "{indent}loader_tile_g2r_{sid}_to_{did}({sbuf_var}({src_access}), {dbuf_var}({target_access}));\n",
                         indent = indent,
                         sid = sbuf_id,
                         did = dbuf_id,
                         sbuf_var = sbuf_var,
-                        dbuf_var = dbuf_var
+                        src_access = source_access_code,
+                        dbuf_var = dbuf_var,
+                        target_access = target_access_code
                     )
                     .as_str();
                 }
@@ -180,11 +187,6 @@ impl ThrillerBlock {
             let dbuf = &edge.dst;
 
             // TODO(KuangjuX): Support Access Memory code generation.
-            #[allow(unused_variables)]
-            let access_map = edge
-                .get_access()
-                .as_ref()
-                .ok_or(ThrillerError::MissingAccessMap)?;
 
             let sbuf_var = sbuf.get_name();
             let dbuf_var = dbuf.get_name();
@@ -220,79 +222,7 @@ impl ThrillerBlock {
         Ok(code)
     }
 
-    // /// Generate load code for the block inputs.
-    // #[allow(dead_code)]
-    // fn gen_load(&self, edge: &Rc<AttachedEdge>) -> ThrillerResult<String> {
-    //     // TODO: This is not a final version of the load code generation. It is just a pseudocode representation of the formalized data flow.
-    //     let mut code = String::new();
-    //     // Generate load inputs.
-
-    //     match self.mem_level {
-    //         MemoryLevel::Register => {
-    //             let access_map = edge
-    //                 .get_access()
-    //                 .as_ref()
-    //                 .ok_or(ThrillerError::MissingAccessMap)?;
-
-    //             let loop_depth = access_map.get_loop_depth();
-    //             if loop_depth != 1 {
-    //                 return Err(ThrillerError::InvalidLoadAccess);
-    //             }
-
-    //             let offsets = access_map.get_access_offsets();
-    //             let matrixs = access_map.get_access_matrixs();
-
-    //             let iter_vars = access_map.get_iter_vars();
-
-    //             code.push_str(&format!(
-    //                     "copy_2d_tile_s2r({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
-    //                     src = edge.get_src_name(),
-    //                     src_access = matrixs[0].0[0][0],
-    //                     src_offset = offsets[0].0[0],
-    //                     src_index = iter_vars[0].get_name(),
-    //                     dst = edge.get_dst_name(),
-    //                     dst_index = iter_vars[0].get_name(),
-    //                     dst_offset = offsets[1].0[0],
-    //                     dst_access = matrixs[1].0[0][0]
-    //                 ));
-    //         }
-
-    //         MemoryLevel::Shared => {
-    //             let access_map = edge
-    //                 .get_access()
-    //                 .as_ref()
-    //                 .ok_or(ThrillerError::MissingAccessMap)?;
-
-    //             let loop_depth = access_map.get_loop_depth();
-    //             if loop_depth != 1 {
-    //                 return Err(ThrillerError::InvalidLoadAccess);
-    //             }
-
-    //             let offsets = access_map.get_access_offsets();
-    //             let matrixs = access_map.get_access_matrixs();
-
-    //             let iter_vars = access_map.get_iter_vars();
-
-    //             code.push_str(&format!(
-    //                     "copy_2d_tile_g2s({src}[{src_access} * {src_index} + {src_offset}], {dst}[{dst_access} * {dst_index} + {dst_offset}]);\n",
-    //                     src = edge.get_src_name(),
-    //                     src_access = matrixs[0].0[0][0],
-    //                     src_offset = offsets[0].0[0],
-    //                     src_index = iter_vars[0].get_name(),
-    //                     dst = edge.get_dst_name(),
-    //                     dst_index = iter_vars[0].get_name(),
-    //                     dst_offset = offsets[1].0[0],
-    //                     dst_access = matrixs[1].0[0][0]
-    //                 ));
-    //         }
-
-    //         MemoryLevel::Global => {
-    //             unimplemented!();
-    //         }
-    //     }
-    //     Ok(code)
-    // }
-
+    /// Emit loop nest program based on [`ThrillerBlock`].
     pub(crate) fn emit_block(&self) -> ThrillerResult<String> {
         let mut code = String::new();
 
@@ -304,7 +234,7 @@ impl ThrillerBlock {
         let subgraph_code = self.subgraph.borrow().emit()?;
 
         for line in subgraph_code.lines() {
-            code += format!("{indent}{line}\n", indent = indent, line = line).as_str()
+            code += format!("{indent}{line}\n", indent = indent, line = line).as_str();
         }
 
         code += self.emit_loop_closure()?.as_str();

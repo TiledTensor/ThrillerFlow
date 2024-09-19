@@ -1,22 +1,27 @@
 use std::rc::Rc;
 
-use crate::var::{IterationVar, Var};
-use crate::{ThrillerError, ThrillerResult};
+use crate::{var::IterationVar, ThrillerResult, Var};
 
-/// An AccessMatrix represents a multi-dimensional access pattern.
+/// An [`AccessMatrix`] represents a multi-dimensional access pattern.
 pub struct AccessMatrix(pub Vec<Vec<usize>>);
 
-/// An AccessOffset represents a multi-dimensional access pattern.
+/// An [`AccessOffset`] represents a multi-dimensional access pattern.
 pub struct AccessOffset(pub Vec<usize>);
 
-/// An AccessMap represents a multi-dimensional access pattern.
-#[allow(dead_code)]
+/// An [`AccessMap`] represents a multi-dimensional access pattern.
+///
+/// An [`AccessMap`] data structure is attached to an [`crate::AttachedEdge`]
+/// and represents the memoey access patterns of the source [`crate::Buffer`]
+/// and the target [`crate::Buffer`].
+///
+/// It refers from polyhedral mathematical model for analyzing memory access patterns.
 pub struct AccessMap {
-    loop_depth: usize,
-    access_dims: Vec<usize>,
-    access_matrixs: Vec<AccessMatrix>,
-    offset: Vec<AccessOffset>,
-    iter_vars: Vec<Rc<IterationVar>>,
+    pub(crate) loop_depth: usize,
+    #[allow(dead_code)]
+    pub(crate) access_dims: Vec<usize>,
+    pub(crate) access_matrixs: Vec<AccessMatrix>,
+    pub(crate) offset: Vec<AccessOffset>,
+    pub(crate) ivars: Vec<Rc<IterationVar>>,
 }
 
 impl AccessMap {
@@ -27,23 +32,23 @@ impl AccessMap {
             access_dims,
             access_matrixs: vec![],
             offset: vec![],
-            iter_vars: vec![],
+            ivars: vec![],
         }
     }
 
     /// Add iter var to access map.
     pub fn add_iter_var(&mut self, iter_var: Rc<IterationVar>) {
-        self.iter_vars.push(iter_var);
+        self.ivars.push(iter_var);
     }
 
     /// Add iter vars to access map.
     pub fn add_iter_vars(&mut self, iter_vars: Vec<Rc<IterationVar>>) {
-        self.iter_vars.extend(iter_vars);
+        self.ivars.extend(iter_vars);
     }
 
     /// Get iter vars in access map.
     pub fn get_iter_vars(&self) -> &Vec<Rc<IterationVar>> {
-        &self.iter_vars
+        &self.ivars
     }
 
     /// Add an access matrix to the access map.
@@ -51,9 +56,19 @@ impl AccessMap {
         self.access_matrixs.push(access_matrix);
     }
 
+    /// Add access matrixs to the access map.
+    pub fn add_access_matrixs(&mut self, access_matrixs: Vec<AccessMatrix>) {
+        self.access_matrixs.extend(access_matrixs);
+    }
+
     /// Add an access offset to the access map.
     pub fn add_access_offset(&mut self, access_offset: AccessOffset) {
         self.offset.push(access_offset);
+    }
+
+    /// Add access offsets to the access map.
+    pub fn add_access_offsets(&mut self, access_offsets: Vec<AccessOffset>) {
+        self.offset.extend(access_offsets);
     }
 
     /// Get access matrixs in access map.
@@ -71,68 +86,38 @@ impl AccessMap {
         self.loop_depth
     }
 
-    /// Generate loop based on `AccessMap` information.
-    pub fn gen_loop_access(&self, inner_code: String) -> ThrillerResult<String> {
-        let mut code = String::new();
-        let mut indent = 0;
-        if self.loop_depth != self.iter_vars.len() {
-            return Err(ThrillerError::LoopMisMatch);
-        }
-        for var in self.iter_vars.iter() {
-            let (start, end) = var.get_domain();
-            let name = var.get_name();
+    /// Emit Memory Access code based on index.
+    pub fn emit_access(&self, index: usize) -> ThrillerResult<Vec<String>> {
+        let mut access = vec![];
 
-            code.push_str(&format!(
-                "{indent}for(int {var} = {start}, {var} < {end}; {var}++){{\n",
-                indent = " ".repeat(indent),
-                var = name,
-                start = start,
-                end = end
-            ));
+        let access_matrix = &self.access_matrixs[index];
+        let access_offset = &self.offset[index];
+        let ivars = &self.ivars;
 
-            indent += 4;
-        }
+        for (rindex, access_row) in access_matrix.0.iter().enumerate() {
+            let offset = &access_offset.0[rindex];
 
-        let access_lines: Vec<&str> = inner_code.lines().collect();
+            let mut code = String::new();
+            // Emit the access row mulipled ivar.
+            for (cindex, access_col) in access_row.iter().enumerate() {
+                let ivar = &ivars[cindex];
+                code.push_str(
+                    format!(
+                        "{access}*{ivar}",
+                        access = *access_col,
+                        ivar = ivar.get_name()
+                    )
+                    .as_str(),
+                );
+            }
 
-        access_lines.iter().for_each(|line| {
-            code.push_str(
-                format!("{indent}{line}\n", indent = " ".repeat(indent), line = line).as_str(),
-            );
-        });
+            if *offset != 0 {
+                code.push_str(format!("+{}", offset).as_str());
+            }
 
-        for _ in 0..self.loop_depth {
-            indent -= 4;
-            code.push_str(format!("{indent}}}\n", indent = " ".repeat(indent)).as_str());
+            access.push(code);
         }
 
-        Ok(code)
-    }
-}
-
-impl PartialEq for AccessMatrix {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
-}
-
-impl PartialEq for AccessOffset {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
-}
-
-impl PartialEq for AccessMap {
-    fn eq(&self, other: &Self) -> bool {
-        self.access_matrixs == other.access_matrixs
-            && self.offset == other.offset
-            && self.loop_depth == other.loop_depth
-            && self.access_dims == other.access_dims
-    }
-}
-
-impl Eq for AccessMap {
-    fn assert_receiver_is_total_eq(&self) {
-        todo!("Implement this function")
+        Ok(access)
     }
 }

@@ -6,27 +6,25 @@ use std::vec::Vec;
 use crate::dataflow::{ThrillerEdge, ThrillerNode, ThrillerNodeInner};
 use crate::debug;
 use crate::task::Task;
-use crate::{next_id, MemoryLevel, ThrillerResult};
+use crate::{next_id, ThrillerResult};
 
-/// Thriller Dataflow Graph structure.
+/// [`ThrillerGraph`] repersents a dataflow task graph within
+/// a d-dimension loop nest.
 #[derive(Default)]
 pub struct ThrillerGraph {
     #[allow(dead_code)]
     id: usize,
     nodes: Vec<Rc<RefCell<ThrillerNode>>>,
     edges: Vec<Rc<ThrillerEdge>>,
-    #[allow(dead_code)]
-    mem_level: MemoryLevel,
 }
 
 impl ThrillerGraph {
     /// Create a new empty ThrillerGraph.
-    pub fn new(mem_level: MemoryLevel) -> Self {
+    pub fn new() -> Self {
         ThrillerGraph {
             id: next_id(),
             nodes: Vec::new(),
             edges: Vec::new(),
-            mem_level,
         }
     }
 

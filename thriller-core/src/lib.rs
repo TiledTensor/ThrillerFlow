@@ -1,4 +1,23 @@
-//! A DataFlow Analyise and Codegen Framework written in Rust.
+//! A DataFlow Analyise and Codegen Compiler written in Rust.
+//!
+//! In ThrillerFlow, we introduce a nested multi-dimendional dataflow
+//! graph called Extended task Dependence Graph(ETDG), a unified intermediate
+//! representation that preserves a holistic view of parallelism and
+//! dependency across different control and data nested levels on the code.
+//! To facilitate code analysis and the later low-level code generation,
+//! an ETDG concisely encodes complex control structures and precisely
+//! represents the iteration-level data dependencies with and acyclic graph.
+//! For a clear exposition, ETDG borrows the concepts from the reduced dependence
+//! graph used classical compilers with the Static Control Program(SCoP) modeling
+//! employed in polyhedral compilers.
+//!
+//! In ThrillerFlow, we introduce some important data structures:
+//!
+//! - [`ThrillerBlock`] represents the data-parallel repetition of a
+//!   dataflow task int form of a d-dimensional dataflow node.
+//! - [`AttachedEdge`] is an edge that connects a source and destination buffer
+//!   with additional access pattern information [`AccessMap`].
+//! - [`AccessMap`] represents a multi-dimensional access pattern.
 
 #![deny(warnings)]
 #![deny(missing_docs)]
@@ -18,8 +37,7 @@ mod var;
 pub use access::{AccessMap, AccessMatrix, AccessOffset};
 pub use buffer::{BufType, Buffer};
 pub use dataflow::{
-    AttachedEdge, BlockType, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
-    ThrillerNodeInner,
+    AttachedEdge, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 pub use engine::{BlockLayout, BlockShape, ThrillerEngine};
 pub use error::{ThrillerError, ThrillerResult};

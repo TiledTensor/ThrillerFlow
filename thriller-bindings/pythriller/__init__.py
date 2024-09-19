@@ -1,1 +1,1 @@
-from .context import initialize_thriller_flow, PyLayout, PyBufType, PyBuffer, PyGraph, PyNode, PyEdge, PyMemoryLevel, Gemm, AttachedEdge, Block, BlockType, IterationVar, AccessMap
+from .context import initialize_thriller_flow, PyLayout, PyBufType, PyBuffer, PyGraph, PyNode, PyEdge, PyMemoryLevel, Gemm, AttachedEdge, Block, IterationVar, AccessMap
