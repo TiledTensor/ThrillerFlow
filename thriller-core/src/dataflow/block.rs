@@ -9,7 +9,12 @@ use crate::task::Task;
 use crate::var::Var;
 use crate::{next_id, BufType, IterationBound, IterationVar};
 
-/// A Thriller Dataflow Block representing a memory level subgraph.
+/// [`ThrillerBlock`] represents the data-parallel repetition of a
+/// dataflow task int form of a d-dimensional dataflow node.
+///
+/// A [`ThrillerBlock`] contains a d-dimensional nested loop with the input [`AttachedEdge`]
+/// and output [`AttachedEdge`] representing tiling load and store operations,
+/// while the subgraph represents the computation operations within the nested loops.
 pub struct ThrillerBlock {
     id: usize,
     pub(crate) inputs: Vec<Rc<AttachedEdge>>,

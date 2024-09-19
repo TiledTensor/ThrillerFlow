@@ -2,16 +2,19 @@ use std::rc::Rc;
 
 use crate::var::IterationVar;
 
-/// An AccessMatrix represents a multi-dimensional access pattern.
+/// An [`AccessMatrix`] represents a multi-dimensional access pattern.
 pub struct AccessMatrix(pub Vec<Vec<usize>>);
 
-/// An AccessOffset represents a multi-dimensional access pattern.
+/// An [`AccessOffset`] represents a multi-dimensional access pattern.
 pub struct AccessOffset(pub Vec<usize>);
 
-/// An AccessMap represents a multi-dimensional access pattern.
+/// An [`AccessMap`] represents a multi-dimensional access pattern.
 ///
-/// An [`AccessMap`] data structure is attached to an [`crate::AttachedEdge`] and represents
-/// the memoey access patterns of the source [`crate::Buffer`] and the target [`crate::Buffer`].
+/// An [`AccessMap`] data structure is attached to an [`crate::AttachedEdge`]
+/// and represents the memoey access patterns of the source [`crate::Buffer`]
+/// and the target [`crate::Buffer`].
+///
+/// It refers from polyhedral mathematical model for analyzing memory access patterns.
 pub struct AccessMap {
     loop_depth: usize,
     #[allow(dead_code)]

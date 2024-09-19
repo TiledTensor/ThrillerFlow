@@ -6,7 +6,7 @@ use crate::buffer::Buffer;
 use crate::dataflow::ThrillerNode;
 use crate::next_id;
 
-/// AttachedEdge is an edge that connects a source and destination buffer
+/// [`AttachedEdge`] is an edge that connects a source and destination buffer
 /// with additional access pattern information [`AccessMap`].
 ///
 /// [`AttachedEdge`] allows connections across different nested loops

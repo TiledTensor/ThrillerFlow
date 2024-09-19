@@ -46,7 +46,7 @@ if __name__ == '__main__':
     print(gC)
 
     MemoryLevel = pythriller.PyMemoryLevel.Register
-    RegGraph = pythriller.PyGraph(MemoryLevel)
+    RegGraph = pythriller.PyGraph()
 
     NodeA = pythriller.PyNode(rA)
     NodeB = pythriller.PyNode(rB)
