@@ -62,7 +62,7 @@ impl Task for Gemm {
             }
 
             code += format!(
-                "cute::gemm(mma, {buf_a}{a}, {buf_b}{b}, {buf_c}{c});\n",
+                "compute::gemm_({buf_a}{a}, {buf_b}{b}, {buf_c}{c});\n",
                 a = access_codes[0],
                 b = access_codes[1],
                 c = access_codes[2],
@@ -75,11 +75,7 @@ impl Task for Gemm {
             Ok(code)
         };
 
-        // code += self.access_map.gen_loop_access(&[gemm])?.as_str();
-
         let gemm_code = gemm(&self.access_map)?;
-        // code += self.access_map.gen_loop_access(gemm_code)?.as_str();
-
         code += gemm_code.as_str();
 
         Ok(code)

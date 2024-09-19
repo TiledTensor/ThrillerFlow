@@ -234,7 +234,7 @@ impl ThrillerBlock {
         let subgraph_code = self.subgraph.borrow().emit()?;
 
         for line in subgraph_code.lines() {
-            code += format!("{indent}{line}\n", indent = indent, line = line).as_str()
+            code += format!("{indent}{line}\n", indent = indent, line = line).as_str();
         }
 
         code += self.emit_loop_closure()?.as_str();

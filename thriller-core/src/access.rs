@@ -101,20 +101,18 @@ impl AccessMap {
             // Emit the access row mulipled ivar.
             for (cindex, access_col) in access_row.iter().enumerate() {
                 let ivar = &ivars[cindex];
-                if *access_col != 0 {
-                    code.push_str(
-                        format!(
-                            "{access}*{ivar}",
-                            access = *access_col,
-                            ivar = ivar.get_name()
-                        )
-                        .as_str(),
-                    );
-                }
+                code.push_str(
+                    format!(
+                        "{access}*{ivar}",
+                        access = *access_col,
+                        ivar = ivar.get_name()
+                    )
+                    .as_str(),
+                );
             }
 
             if *offset != 0 {
-                code.push_str(format!(" + {}", offset).as_str());
+                code.push_str(format!("+{}", offset).as_str());
             }
 
             access.push(code);
