@@ -7,7 +7,27 @@ use crate::dataflow::ThrillerNode;
 use crate::next_id;
 
 /// AttachedEdge is an edge that connects a source and destination buffer
-/// with additional access pattern information `AccessMap`.
+/// with additional access pattern information [`AccessMap`].
+///
+/// [`AttachedEdge`] allows connections across different nested loops
+/// ([`crate::ThrillerBlock`]), fixing the relevant ivars for use
+/// in the generated memory access code.
+///
+/// Examples:
+/// In FlashAttention-v2:
+/// ```cpp
+/// for (int n = 0; n < GIteratorV::sc0; ++n) {
+///     load_sv(gVs(n), sV);
+///     for (int k = 0; k < GIteratorQ::sc1; ++k) {
+///          load_sq(gQs(k), sQ);
+///          load_sk(gKs(k, n), sK);
+///          ...
+///     }
+/// }    
+/// ```
+/// In the above example, the `AttachedEdge` between `gKs` and `sK` will have
+/// the following ivars: `n` and `k`. This is because the `gKs` buffer
+/// is accessed by the outer loop `n` and the inner loop `k`.
 pub struct AttachedEdge {
     #[allow(dead_code)]
     pub(crate) id: usize,
