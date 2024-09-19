@@ -16,12 +16,12 @@ pub struct AccessOffset(pub Vec<usize>);
 ///
 /// It refers from polyhedral mathematical model for analyzing memory access patterns.
 pub struct AccessMap {
-    loop_depth: usize,
+    pub(crate) loop_depth: usize,
     #[allow(dead_code)]
-    access_dims: Vec<usize>,
-    access_matrixs: Vec<AccessMatrix>,
-    offset: Vec<AccessOffset>,
-    ivars: Vec<Rc<IterationVar>>,
+    pub(crate) access_dims: Vec<usize>,
+    pub(crate) access_matrixs: Vec<AccessMatrix>,
+    pub(crate) offset: Vec<AccessOffset>,
+    pub(crate) ivars: Vec<Rc<IterationVar>>,
 }
 
 impl AccessMap {
