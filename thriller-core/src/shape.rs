@@ -52,7 +52,7 @@ where
 
 /// Dimension description.
 ///
-/// `Dim` describes the number of axes and the length of each axis
+/// [`Dim`] describes the number of axes and the length of each axis
 /// in an array. It is also used as an index type.
 #[derive(Clone, Debug)]
 pub struct Dim {

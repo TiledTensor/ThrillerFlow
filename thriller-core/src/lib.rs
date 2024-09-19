@@ -19,6 +19,10 @@
 //!   with additional access pattern information [`AccessMap`].
 //! - [`AccessMap`] represents a multi-dimensional access pattern.
 //! - [`ThrillerGraph`] represents a d-dimensional dataflow task graph within nested loops.
+//! - [`ThrillerNode`] represents an abstract node element that can represent a Buffer Node,
+//!   Operator Node and Block Node.
+//! - [`ThrillerEdge`] represents the edge connecting two [`ThrillerNode`]s in a directed
+//!   acyclic graph.
 //! - [`Buffer`] represents an addressable instance declared in user mode, which contains
 //!   [`Shape`], [`Layout`] and [`BufType`].
 
