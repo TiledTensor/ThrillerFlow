@@ -14,9 +14,9 @@
 //! In ThrillerFlow, we introduce some important data structures:
 //!
 //! - [`ThrillerBlock`] represents the data-parallel repetition of a
-//! dataflow task int form of a d-dimensional dataflow node.
+//!   dataflow task int form of a d-dimensional dataflow node.
 //! - [`AttachedEdge`] is an edge that connects a source and destination buffer
-//! with additional access pattern information [`AccessMap`].
+//!   with additional access pattern information [`AccessMap`].
 //! - [`AccessMap`] represents a multi-dimensional access pattern.
 
 #![deny(warnings)]
