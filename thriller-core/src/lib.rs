@@ -18,6 +18,9 @@
 //! - [`AttachedEdge`] is an edge that connects a source and destination buffer
 //!   with additional access pattern information [`AccessMap`].
 //! - [`AccessMap`] represents a multi-dimensional access pattern.
+//! - [`ThrillerGraph`] represents a d-dimensional dataflow task graph within nested loops.
+//! - [`Buffer`] represents an addressable instance declared in user mode, which contains
+//!   [`Shape`], [`Layout`] and [`BufType`].
 
 #![deny(warnings)]
 #![deny(missing_docs)]
