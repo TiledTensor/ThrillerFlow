@@ -4,7 +4,6 @@ use std::rc::Rc;
 use crate::{next_id, AccessMap, Task, ThrillerError, ThrillerNode, ThrillerResult, Var};
 
 /// Gemm is a task that performs matrix multiplication.
-#[derive(Clone)]
 pub struct Gemm {
     prevs: Vec<Rc<RefCell<ThrillerNode>>>,
     next: Rc<RefCell<ThrillerNode>>,
@@ -63,7 +62,7 @@ impl Task for Gemm {
             }
 
             code += format!(
-                "compute::gemm_({buf_a}{a}, {buf_b}{b}, {buf_c}{c});\n",
+                "cute::gemm(mma, {buf_a}{a}, {buf_b}{b}, {buf_c}{c});\n",
                 a = access_codes[0],
                 b = access_codes[1],
                 c = access_codes[2],

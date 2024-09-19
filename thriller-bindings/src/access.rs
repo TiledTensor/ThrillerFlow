@@ -28,10 +28,29 @@ impl PyAccessMap {
             .map(|v| v.extract::<PyRef<PyIterationVar>>().unwrap().0.clone())
             .collect::<Vec<_>>();
 
-        let access = access
+        let accesses = access
             .into_iter()
             .map(|a| {
                 a.extract::<Bound<PyList>>()
+                    .unwrap()
+                    .into_iter()
+                    .map(|i| {
+                        i.extract::<Bound<PyList>>()
+                            .unwrap()
+                            .into_iter()
+                            .map(|j| j.extract::<usize>().unwrap())
+                            .collect::<Vec<_>>()
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+
+        let access_matrixs = accesses.into_iter().map(AccessMatrix).collect::<Vec<_>>();
+
+        let offsetes = offset
+            .into_iter()
+            .map(|o| {
+                o.extract::<Bound<PyList>>()
                     .unwrap()
                     .into_iter()
                     .map(|i| i.extract::<usize>().unwrap())
@@ -39,19 +58,13 @@ impl PyAccessMap {
             })
             .collect::<Vec<_>>();
 
-        let access = AccessMatrix(access);
-
-        let offset = offset
-            .into_iter()
-            .map(|o| o.extract::<usize>().unwrap())
-            .collect::<Vec<_>>();
-        let offset = AccessOffset(offset);
+        let access_offsets = offsetes.into_iter().map(AccessOffset).collect::<Vec<_>>();
 
         let mut map = AccessMap::new(dims.len(), dims);
 
         map.add_iter_vars(vars);
-        map.add_access_matrix(access);
-        map.add_access_offset(offset);
+        map.add_access_matrixs(access_matrixs);
+        map.add_access_offsets(access_offsets);
 
         PyAccessMap(Rc::new(map))
     }

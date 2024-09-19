@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::var::IterationVar;
+use crate::{var::IterationVar, ThrillerResult, Var};
 
 /// An [`AccessMatrix`] represents a multi-dimensional access pattern.
 pub struct AccessMatrix(pub Vec<Vec<usize>>);
@@ -56,9 +56,19 @@ impl AccessMap {
         self.access_matrixs.push(access_matrix);
     }
 
+    /// Add access matrixs to the access map.
+    pub fn add_access_matrixs(&mut self, access_matrixs: Vec<AccessMatrix>) {
+        self.access_matrixs.extend(access_matrixs);
+    }
+
     /// Add an access offset to the access map.
     pub fn add_access_offset(&mut self, access_offset: AccessOffset) {
         self.offset.push(access_offset);
+    }
+
+    /// Add access offsets to the access map.
+    pub fn add_access_offsets(&mut self, access_offsets: Vec<AccessOffset>) {
+        self.offset.extend(access_offsets);
     }
 
     /// Get access matrixs in access map.
@@ -74,5 +84,42 @@ impl AccessMap {
     /// Get Loop depth of AccessMap
     pub fn get_loop_depth(&self) -> usize {
         self.loop_depth
+    }
+
+    /// Emit Memory Access code based on index.
+    pub fn emit_access(&self, index: usize) -> ThrillerResult<Vec<String>> {
+        let mut access = vec![];
+
+        let access_matrix = &self.access_matrixs[index];
+        let access_offset = &self.offset[index];
+        let ivars = &self.ivars;
+
+        for (rindex, access_row) in access_matrix.0.iter().enumerate() {
+            let offset = &access_offset.0[rindex];
+
+            let mut code = String::new();
+            // Emit the access row mulipled ivar.
+            for (cindex, access_col) in access_row.iter().enumerate() {
+                let ivar = &ivars[cindex];
+                if *access_col != 0 {
+                    code.push_str(
+                        format!(
+                            "{access}*{ivar}",
+                            access = *access_col,
+                            ivar = ivar.get_name()
+                        )
+                        .as_str(),
+                    );
+                }
+            }
+
+            if *offset != 0 {
+                code.push_str(format!(" + {}", offset).as_str());
+            }
+
+            access.push(code);
+        }
+
+        Ok(access)
     }
 }

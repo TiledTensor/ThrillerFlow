@@ -57,11 +57,9 @@ if __name__ == '__main__':
     LoopIter = pythriller.IterationVar('i', (0, 4))
 
     access_dims = [1]
-    access_map = [[1]]
-    access_offset = [0]
 
     AccessMap = pythriller.AccessMap(
-        access_dims, access_map, access_offset, [LoopIter])
+        access_dims, [[[1]], [[0]]], [[0], [10]], [LoopIter])
 
     EdgeA_Gemm = pythriller.PyEdge(NodeA, GemmNode)
     EdgeB_GEMM = pythriller.PyEdge(NodeB, GemmNode)

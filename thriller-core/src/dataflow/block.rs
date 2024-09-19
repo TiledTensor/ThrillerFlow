@@ -104,15 +104,39 @@ impl ThrillerBlock {
             let sbuf_id = sbuf.get_id();
             let dbuf_id = dbuf.get_id();
 
+            let source_access_code = edge.emit_source_access()?.iter().enumerate().fold(
+                String::new(),
+                |acc, (index, access)| {
+                    if index == 0 {
+                        access.to_string()
+                    } else {
+                        format!("{acc}, {access}", acc = acc, access = access)
+                    }
+                },
+            );
+
+            let target_access_code = edge.emit_target_access()?.iter().enumerate().fold(
+                String::new(),
+                |acc, (index, access)| {
+                    if index == 0 {
+                        access.to_string()
+                    } else {
+                        format!("{acc}, {access}", acc = acc, access = access)
+                    }
+                },
+            );
+
             match (sbuf.get_typing(), dbuf.get_typing()) {
                 (BufType::GlobalTile, BufType::RegTile) => {
                     code += format!(
-                        "{indent}loader_tile_g2r_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        "{indent}loader_tile_g2r_{sid}_to_{did}({sbuf_var}({src_access}), {dbuf_var}({target_access}));\n",
                         indent = indent,
                         sid = sbuf_id,
                         did = dbuf_id,
                         sbuf_var = sbuf_var,
-                        dbuf_var = dbuf_var
+                        src_access = source_access_code,
+                        dbuf_var = dbuf_var,
+                        target_access = target_access_code
                     )
                     .as_str();
                 }

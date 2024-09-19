@@ -4,7 +4,7 @@ use std::rc::Rc;
 use crate::access::AccessMap;
 use crate::buffer::Buffer;
 use crate::dataflow::ThrillerNode;
-use crate::{next_id, ThrillerResult, Var};
+use crate::{next_id, ThrillerResult};
 
 /// [`AttachedEdge`] is an edge that connects a source and destination buffer
 /// with additional access pattern information [`AccessMap`].
@@ -62,42 +62,14 @@ impl AttachedEdge {
         &self.access
     }
 
-    /// Emit Memory Access code based on index.
-    pub fn emit_access(&self, index: usize) -> ThrillerResult<Vec<String>> {
-        let mut access = vec![];
+    /// Emit source Memory Access code.
+    pub fn emit_source_access(&self) -> ThrillerResult<Vec<String>> {
+        self.access.emit_access(0)
+    }
 
-        let access_map = &self.access;
-        let access_matrix = &access_map.access_matrixs[index];
-        let access_offset = &access_map.offset[index];
-        let ivars = &access_map.ivars;
-
-        for (rindex, access_row) in access_matrix.0.iter().enumerate() {
-            let offset = &access_offset.0[rindex];
-
-            let mut code = String::new();
-            // Emit the access row mulipled ivar.
-            for (cindex, access_col) in access_row.iter().enumerate() {
-                let ivar = &ivars[cindex];
-                if *access_col != 0 {
-                    code.push_str(
-                        format!(
-                            "{access} * {ivar}",
-                            access = *access_col,
-                            ivar = ivar.get_name()
-                        )
-                        .as_str(),
-                    );
-                }
-            }
-
-            if *offset != 0 {
-                code.push_str(format!(" + {}", offset).as_str());
-            }
-
-            access.push(code);
-        }
-
-        Ok(access)
+    /// Emit target Memory Access code.
+    pub fn emit_target_access(&self) -> ThrillerResult<Vec<String>> {
+        self.access.emit_access(1)
     }
 }
 
