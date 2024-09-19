@@ -3,7 +3,8 @@ use std::rc::Rc;
 
 use crate::{next_id, AccessMap, Task, ThrillerError, ThrillerNode, ThrillerResult, Var};
 
-/// Gemm is a task that performs matrix multiplication.
+/// [`Gemm`] is a task that computes the General Matrix-Matrix Multiplication
+/// operation in register level.
 pub struct Gemm {
     prevs: Vec<Rc<RefCell<ThrillerNode>>>,
     next: Rc<RefCell<ThrillerNode>>,

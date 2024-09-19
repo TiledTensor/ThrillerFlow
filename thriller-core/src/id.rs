@@ -2,6 +2,7 @@ use std::cell::OnceCell;
 
 pub static mut ID_COUNTER: OnceCell<IdCounter> = OnceCell::new();
 
+/// [`IdCounter`] is a counter that generates unique IDs.
 pub struct IdCounter {
     id: usize,
 }

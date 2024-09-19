@@ -14,7 +14,8 @@ pub enum BufType {
     RegVec,
 }
 
-/// A Buffer data structure.
+/// [`Buffer`] represents an addressable instance declared in user mode, which contains
+/// [`Shape`], [`Layout`] and [`BufType`].
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct Buffer {

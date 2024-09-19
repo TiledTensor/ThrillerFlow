@@ -1,3 +1,8 @@
+//! Python bindings for the thriller-flow crate.
+
+#![deny(warnings)]
+#![deny(missing_docs)]
+
 use access::PyAccessMap;
 use pyo3::prelude::*;
 

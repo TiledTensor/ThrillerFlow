@@ -73,8 +73,8 @@ impl AttachedEdge {
     }
 }
 
-/// `ThrillerEdge` repersent load/store in dataflow graph.
-#[allow(dead_code)]
+/// [`ThrillerEdge`] represents the edge connecting two [`ThrillerNode`]s in a directed
+/// acyclic graph.
 pub struct ThrillerEdge {
     src: Rc<RefCell<ThrillerNode>>,
     dst: Rc<RefCell<ThrillerNode>>,

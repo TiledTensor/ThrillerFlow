@@ -16,8 +16,8 @@ pub enum ThrillerNodeInner {
     Block(Rc<ThrillerBlock>),
 }
 
-/// A Thriller Dataflow Node that represents either a block of subgraph or an operation.
-#[allow(dead_code)]
+/// [`ThrillerNode`] represents an abstract node element that can represent a Buffer Node,
+/// Operator Node and Block Node.
 pub struct ThrillerNode {
     inner: Box<ThrillerNodeInner>,
     in_edges: Vec<Rc<ThrillerEdge>>,
