@@ -153,7 +153,6 @@ impl ThrillerBlock {
                 }
 
                 (BufType::GlobalTile, BufType::SharedTile) => {
-                    insert_copy_async = true;
                     code += format!(
                         "{indent}loader_tile_g2s_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
                         indent = indent,
