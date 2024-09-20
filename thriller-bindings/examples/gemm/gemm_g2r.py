@@ -49,9 +49,9 @@ if __name__ == '__main__':
 
     RegGraph = Graph()
 
-    NodeA = Node(rA)
-    NodeB = Node(rB)
-    NodeAcc = Node(acc)
+    NodeA = Node.tensor(rA)
+    NodeB = Node.tensor(rB)
+    NodeAcc = Node.tensor(acc)
 
     GemmNode = Node.gemm(NodeA, NodeB, NodeAcc)
 

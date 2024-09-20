@@ -59,9 +59,9 @@ if __name__ == '__main__':
     gC = Tensor("gC", GlobalDimC, GlobalLayoutC, TensorType.GlobalTile)
 
     # Define Reg Node for A, B, C.
-    NodeRA = Node(rA)
-    NodeRB = Node(rB)
-    NodeRC = Node(acc)
+    NodeRA = Node.tensor(rA)
+    NodeRB = Node.tensor(rB)
+    NodeRC = Node.tensor(acc)
 
     # Define Reg GEMM Node.
     RegGemmNode = Node.gemm(NodeRA, NodeRB, NodeRC)
@@ -72,14 +72,14 @@ if __name__ == '__main__':
     RegEdgeC = Edge(RegGemmNode, NodeRC)
 
     # Define Shared Node for A, B, C.
-    NodeSA = Node(sA)
-    NodeSB = Node(sB)
-    NodeSC = Node(sC)
+    NodeSA = Node.tensor(sA)
+    NodeSB = Node.tensor(sB)
+    NodeSC = Node.tensor(sC)
 
     # Define Global Node for A, B, C.
-    NodeGA = Node(gA)
-    NodeGB = Node(gB)
-    NodeGC = Node(gC)
+    NodeGA = Node.tensor(gA)
+    NodeGB = Node.tensor(gB)
+    NodeGC = Node.tensor(gC)
 
     # Define loop iter from shared to register
     LoopIterS2R = IterationVar('j', (0, 1))
