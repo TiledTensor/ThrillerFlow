@@ -9,14 +9,7 @@ use crate::buffer::PyBuffer;
 
 use std::{cell::RefCell, rc::Rc};
 
-#[pyclass]
-pub enum PyMemoryLevel {
-    Register,
-    Shared,
-    Global,
-}
-
-#[pyclass(unsendable)]
+#[pyclass(unsendable, module = "graph", name = "Graph")]
 pub struct PyGraph(pub Rc<RefCell<ThrillerGraph>>);
 
 #[pymethods]
@@ -66,7 +59,7 @@ impl PyGraph {
     }
 }
 
-#[pyclass(unsendable)]
+#[pyclass(unsendable, module = "graph", name = "Node")]
 pub struct PyNode(pub Rc<RefCell<ThrillerNode>>);
 
 #[pymethods]
@@ -98,7 +91,7 @@ impl PyNode {
     }
 }
 
-#[pyclass(unsendable)]
+#[pyclass(unsendable, module = "graph", name = "Edge")]
 pub struct PyEdge(pub Rc<ThrillerEdge>);
 
 #[pymethods]
