@@ -1,3 +1,4 @@
 .env/
 tests/__pycache__
 pythriller/__pycache__
+*/__pycache__

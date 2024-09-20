@@ -5,8 +5,15 @@ use crate::dataflow::{ThrillerBlock, ThrillerEdge};
 use crate::task::Task;
 use crate::{next_id, Buffer, ThrillerResult};
 
-/// `ThrillerNodeInnrer` is an enum to represent either an operation or a block.
-#[allow(dead_code)]
+/// [`ThrillerNodeInner`] is an enum to represent either an operation or a block.
+///
+/// In [`ThrillerNode`], [`Buffer`] Node will merely be a placeholder that represents
+/// tensor in memory, without actually performing any computation.
+///
+/// [`Task`] represents an abstract operation that can be executed by a [`crate::ThrillerGraph`].
+///
+/// [`ThrillerBlock`] represents a data-parallel repetition of a dataflow task in the form of a
+/// loop.
 pub enum ThrillerNodeInner {
     /// An operation.
     Op(Box<dyn Task>),

@@ -3,16 +3,16 @@ use std::rc::Rc;
 use pyo3::prelude::*;
 use thriller_core::{BufType, Buffer, Dim, Layout};
 
-#[pyclass(unsendable)]
+#[pyclass(unsendable, module = "buffer", name = "Tensor")]
 pub struct PyBuffer(pub Rc<Buffer>);
 
-#[pyclass]
+#[pyclass(module = "buffer", name = "Layout")]
 pub enum PyLayout {
     RowMajor,
     ColMajor,
 }
 
-#[pyclass]
+#[pyclass(module = "buffer", name = "TensorType")]
 pub enum PyBufType {
     GlobalTile,
     SharedTile,

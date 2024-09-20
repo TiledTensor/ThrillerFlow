@@ -47,12 +47,12 @@ impl ThrillerBlock {
 
         // Generate loop.
         for ivar in self.ivars.iter() {
-            let (upper, lower) = ivar.get_domain();
+            let (lower, upper) = ivar.get_domain();
 
-            code += match (upper, lower) {
-                (IterationBound::Fixed(upper), IterationBound::Fixed(lower)) => {
+            code += match (lower, upper) {
+                (IterationBound::Fixed(lower), IterationBound::Fixed(upper)) => {
                     format!(
-                        "{indent}for(int {ivar} = {lower}; {ivar} < {upper}; {ivar}++){{\n",
+                        "{indent}for(int {ivar} = {lower}; {ivar} < {upper}; ++{ivar}){{\n",
                         indent = " ".repeat(indent),
                         ivar = ivar.get_name(),
                         lower = lower,
@@ -95,8 +95,6 @@ impl ThrillerBlock {
 
             let sbuf = &edge.src;
             let dbuf = &edge.dst;
-
-            // TODO(KuangjuX): Support Access Memory code generation.
 
             let sbuf_var = sbuf.get_name();
             let dbuf_var = dbuf.get_name();
@@ -145,6 +143,19 @@ impl ThrillerBlock {
                     insert_copy_async = true;
                     code += format!(
                         "{indent}loader_tile_s2r_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        indent = indent,
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
+                (BufType::GlobalTile, BufType::SharedTile) => {
+                    insert_copy_async = true;
+                    code += format!(
+                        "{indent}loader_tile_g2s_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
                         indent = indent,
                         sid = sbuf_id,
                         did = dbuf_id,
@@ -206,6 +217,28 @@ impl ThrillerBlock {
                     .as_str();
                 }
 
+                (BufType::RegTile, BufType::SharedTile) => {
+                    code += format!(
+                        "storer_tile_r2s_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
+                (BufType::SharedTile, BufType::GlobalTile) => {
+                    code += format!(
+                        "storer_tile_s2g_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
                 _ => todo!(),
             }
         }
@@ -241,6 +274,9 @@ impl ThrillerBlock {
 
         code += self.emit_sync()?.as_str();
 
+        // TODO(KuangjuX): Determine whether the `store` operation is
+        // codegen inside or outside the nested loop based on the
+        // [`AccessMap`].
         code += self.emit_store()?.as_str();
 
         Ok(code)

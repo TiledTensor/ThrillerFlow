@@ -8,7 +8,7 @@ use pyo3::prelude::*;
 
 use block::{PyAttachedEdge, PyBlock};
 use buffer::{PyBufType, PyBuffer, PyLayout};
-use graph::{PyEdge, PyGraph, PyMemoryLevel, PyNode};
+use graph::{PyEdge, PyGraph, PyNode};
 use op::PyGemm;
 use thriller_core::initialize;
 use var::PyIterationVar;
@@ -39,7 +39,6 @@ fn thriller_flow(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyGraph>()?;
     m.add_class::<PyNode>()?;
     m.add_class::<PyEdge>()?;
-    m.add_class::<PyMemoryLevel>()?;
 
     m.add_class::<PyGemm>()?;
 

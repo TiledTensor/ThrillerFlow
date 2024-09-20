@@ -1,25 +1,27 @@
 import context
 
-import pythriller
+from pythriller import initialize_thriller_flow
+from pythriller import Tensor, Layout, TensorType, Graph, Node, Edge
+from pythriller import AttachedEdge, Block, IterationVar, AccessMap
 
 if __name__ == '__main__':
-    pythriller.initialize_thriller_flow()
+    initialize_thriller_flow()
 
-    LayoutA = pythriller.PyLayout.RowMajor
-    LayoutB = pythriller.PyLayout.RowMajor
-    LayoutC = pythriller.PyLayout.RowMajor
+    LayoutA = Layout.RowMajor
+    LayoutB = Layout.RowMajor
+    LayoutC = Layout.RowMajor
 
-    GlobalLayoutA = pythriller.PyLayout.RowMajor
-    GlobalLayoutB = pythriller.PyLayout.ColMajor
-    GlobalLayoutC = pythriller.PyLayout.RowMajor
+    GlobalLayoutA = Layout.RowMajor
+    GlobalLayoutB = Layout.ColMajor
+    GlobalLayoutC = Layout.RowMajor
 
-    BufTypeA = pythriller.PyBufType.RegTile
-    BufTypeB = pythriller.PyBufType.RegTile
-    BufTypeC = pythriller.PyBufType.RegTile
+    BufTypeA = TensorType.RegTile
+    BufTypeB = TensorType.RegTile
+    BufTypeC = TensorType.RegTile
 
-    GlobalTypeA = pythriller.PyBufType.GlobalTile
-    GlobalTypeB = pythriller.PyBufType.GlobalTile
-    GlobalTypeC = pythriller.PyBufType.GlobalTile
+    GlobalTypeA = TensorType.GlobalTile
+    GlobalTypeB = TensorType.GlobalTile
+    GlobalTypeC = TensorType.GlobalTile
 
     DimA = [64, 64]
     DimB = [64, 64]
@@ -29,13 +31,13 @@ if __name__ == '__main__':
     GlobalDimB = [256, 256]
     GlobalDimC = [256, 256]
 
-    rA = pythriller.PyBuffer("rA", DimA, LayoutA, BufTypeA)
-    rB = pythriller.PyBuffer("rB", DimB, LayoutB, BufTypeB)
-    acc = pythriller.PyBuffer("acc", DimC, LayoutC, BufTypeC)
+    rA = Tensor("rA", DimA, LayoutA, BufTypeA)
+    rB = Tensor("rB", DimB, LayoutB, BufTypeB)
+    acc = Tensor("acc", DimC, LayoutC, BufTypeC)
 
-    gA = pythriller.PyBuffer("gA", GlobalDimA, GlobalLayoutA, GlobalTypeA)
-    gB = pythriller.PyBuffer("gB", GlobalDimB, GlobalLayoutB, GlobalTypeB)
-    gC = pythriller.PyBuffer("gC", GlobalDimC, GlobalLayoutC, GlobalTypeC)
+    gA = Tensor("gA", GlobalDimA, GlobalLayoutA, GlobalTypeA)
+    gB = Tensor("gB", GlobalDimB, GlobalLayoutB, GlobalTypeB)
+    gC = Tensor("gC", GlobalDimC, GlobalLayoutC, GlobalTypeC)
 
     print(rA)
     print(rB)
@@ -45,37 +47,35 @@ if __name__ == '__main__':
     print(gB)
     print(gC)
 
-    MemoryLevel = pythriller.PyMemoryLevel.Register
-    RegGraph = pythriller.PyGraph()
+    RegGraph = Graph()
 
-    NodeA = pythriller.PyNode(rA)
-    NodeB = pythriller.PyNode(rB)
-    NodeAcc = pythriller.PyNode(acc)
+    NodeA = Node.tensor(rA)
+    NodeB = Node.tensor(rB)
+    NodeAcc = Node.tensor(acc)
 
-    GemmNode = pythriller.PyNode.gemm(NodeA, NodeB, NodeAcc)
+    GemmNode = Node.gemm(NodeA, NodeB, NodeAcc)
 
-    LoopIter = pythriller.IterationVar('i', (0, 4))
+    LoopIter = IterationVar('i', (0, 4))
 
     access_dims = [1]
 
-    AccessMap = pythriller.AccessMap(
+    AccessMap = AccessMap(
         access_dims, [[[1]], [[0]]], [[0], [10]], [LoopIter])
 
-    EdgeA_Gemm = pythriller.PyEdge(NodeA, GemmNode)
-    EdgeB_GEMM = pythriller.PyEdge(NodeB, GemmNode)
-    EdgeGemm_Acc = pythriller.PyEdge(GemmNode, NodeAcc)
+    EdgeA_Gemm = Edge(NodeA, GemmNode)
+    EdgeB_Gemm = Edge(NodeB, GemmNode)
+    EdgeGemm_Acc = Edge(GemmNode, NodeAcc)
 
     RegGraph.add_nodes([NodeA, NodeB, NodeAcc, GemmNode])
-    RegGraph.add_edges([EdgeA_Gemm, EdgeB_GEMM, EdgeGemm_Acc])
+    RegGraph.add_edges([EdgeA_Gemm, EdgeB_Gemm, EdgeGemm_Acc])
 
     RegGraph.connect()
 
-    LoadGlobalToRegEdgeA = pythriller.AttachedEdge(gA, rA, AccessMap)
-    LoadGlobalToRegEdgeB = pythriller.AttachedEdge(gB, rB, AccessMap)
-    StoreRegToGlobalEdgeC = pythriller.AttachedEdge(acc, gC, AccessMap)
-    G2RBlockMemLevel = pythriller.PyMemoryLevel.Register
+    LoadGlobalToRegEdgeA = AttachedEdge(gA, rA, AccessMap)
+    LoadGlobalToRegEdgeB = AttachedEdge(gB, rB, AccessMap)
+    StoreRegToGlobalEdgeC = AttachedEdge(acc, gC, AccessMap)
 
-    GlobalToRegBlock = pythriller.Block(
+    GlobalToRegBlock = Block(
         [LoadGlobalToRegEdgeA, LoadGlobalToRegEdgeB], [StoreRegToGlobalEdgeC], RegGraph, [LoopIter])
 
     code = GlobalToRegBlock.codegen()

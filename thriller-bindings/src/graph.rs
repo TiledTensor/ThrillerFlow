@@ -5,18 +5,12 @@ use thriller_core::{
     AccessMap, Gemm, Task, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 
+use crate::block::PyBlock;
 use crate::buffer::PyBuffer;
 
 use std::{cell::RefCell, rc::Rc};
 
-#[pyclass]
-pub enum PyMemoryLevel {
-    Register,
-    Shared,
-    Global,
-}
-
-#[pyclass(unsendable)]
+#[pyclass(unsendable, module = "graph", name = "Graph")]
 pub struct PyGraph(pub Rc<RefCell<ThrillerGraph>>);
 
 #[pymethods]
@@ -66,17 +60,24 @@ impl PyGraph {
     }
 }
 
-#[pyclass(unsendable)]
+#[pyclass(unsendable, module = "graph", name = "Node")]
 pub struct PyNode(pub Rc<RefCell<ThrillerNode>>);
 
 #[pymethods]
 impl PyNode {
-    #[new]
-    fn buffer(buf: &PyBuffer) -> Self {
+    #[staticmethod]
+    fn tensor(buf: PyRef<PyBuffer>) -> Self {
         let node = ThrillerNode::new(thriller_core::ThrillerNodeInner::Buffer(Rc::clone(&buf.0)));
         PyNode(Rc::new(RefCell::new(node)))
     }
 
+    #[staticmethod]
+    fn block(block: PyRef<PyBlock>) -> Self {
+        let node = ThrillerNode::new(ThrillerNodeInner::Block(Rc::clone(&block.0)));
+        PyNode(Rc::new(RefCell::new(node)))
+    }
+
+    #[staticmethod]
     fn gemm(a: PyRef<PyNode>, b: PyRef<PyNode>, c: PyRef<PyNode>) -> Self {
         let access_map = AccessMap::new(0, vec![]);
 
@@ -98,7 +99,7 @@ impl PyNode {
     }
 }
 
-#[pyclass(unsendable)]
+#[pyclass(unsendable, module = "graph", name = "Edge")]
 pub struct PyEdge(pub Rc<ThrillerEdge>);
 
 #[pymethods]
