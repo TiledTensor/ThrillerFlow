@@ -152,6 +152,19 @@ impl ThrillerBlock {
                     .as_str();
                 }
 
+                (BufType::GlobalTile, BufType::SharedTile) => {
+                    insert_copy_async = true;
+                    code += format!(
+                        "{indent}loader_tile_g2s_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        indent = indent,
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
                 _ => todo!(),
             }
         }
@@ -207,6 +220,17 @@ impl ThrillerBlock {
                 (BufType::RegTile, BufType::SharedTile) => {
                     code += format!(
                         "storer_tile_r2s_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
+                (BufType::SharedTile, BufType::GlobalTile) => {
+                    code += format!(
+                        "storer_tile_s2g_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
                         sid = sbuf_id,
                         did = dbuf_id,
                         sbuf_var = sbuf_var,

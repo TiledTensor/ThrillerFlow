@@ -94,10 +94,22 @@ if __name__ == '__main__':
         [0], [[[1]], [[0]]], [[0], [0]], [LoopIterS2R])
     AccessMapRC2SC = AccessMap([0], [[[]], [[]]], [[], []], [])
 
+    # Build AccessMap from Global to Shared.
+    AccessMapGA2SA = AccessMap(
+        [0], [[[1]], [[0]]], [[0], [0]], [LoopIterG2S])
+    AccessMapGB2SB = AccessMap(
+        [0], [[[1]], [[0]]], [[0], [0]], [LoopIterG2S])
+    AccessMapSC2GC = AccessMap([0], [[[]], [[]]], [[], []], [])
+
     # Build Attached Edge from Shared to Register.
     AttachedEdgeSA2RA = AttachedEdge(sA, rA, AccessMapSA2RA)
     AttachedEdgeSB2RB = AttachedEdge(sB, rB, AccessMapSB2RB)
     AttachedEdgeSC2RC = AttachedEdge(acc, sC, AccessMapRC2SC)
+
+    # Build Attached Edge from Global to Shared.
+    AttachedEdgeGA2SA = AttachedEdge(gA, sA, AccessMapGA2SA)
+    AttachedEdgeGB2SB = AttachedEdge(gB, sB, AccessMapGB2SB)
+    AttachedEdgeSC2GC = AttachedEdge(sC, gC, AccessMapSC2GC)
 
     # Build Register Level ETDG.
     RegGraph = Graph()
@@ -120,3 +132,32 @@ if __name__ == '__main__':
     # Print codegen for Shared to Register Block.
     shared_to_reg_code = SharedToRegBlock.codegen()
     print(shared_to_reg_code)
+
+    # Define BlockNode for SharedToRegBlock
+    SharedBlockNode = Node.block(SharedToRegBlock)
+
+    # Define Edge for SA, SB, SC, SharedBlockNode.
+    EdgeSA2Block = Edge(NodeSA, SharedBlockNode)
+    EdgeSB2Block = Edge(NodeSB, SharedBlockNode)
+    EdgeBlock2SC = Edge(SharedBlockNode, NodeSC)
+
+    # Build Shared Level ETDG.
+    SharedGraph = Graph()
+    # Add Shared Nodes into Shared Graph.
+    SharedGraph.add_nodes([NodeSA, NodeSB, NodeSC, SharedBlockNode])
+    # Add Shared Edges into Shared Graph.
+    SharedGraph.add_edges([EdgeSA2Block, EdgeSB2Block, EdgeBlock2SC])
+    # Connect Shared Graph.
+    SharedGraph.connect()
+
+    # Print codegen for Shared Graph.
+    shared_code = SharedGraph.codegen()
+    print(shared_code)
+
+    # Build Block for Global to Shared.
+    GlobalToSharedBlock = Block(
+        [AttachedEdgeGA2SA, AttachedEdgeGB2SB], [AttachedEdgeSC2GC], SharedGraph, [LoopIterG2S])
+
+    # Print codegen for Global to Shared Block.
+    global_to_shared_code = GlobalToSharedBlock.codegen()
+    print(global_to_shared_code)

@@ -1,6 +1,5 @@
 use pyo3::prelude::*;
 use pyo3::types::PyList;
-use pyo3::PyObject;
 
 use thriller_core::{
     AccessMap, Gemm, Task, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
@@ -72,11 +71,13 @@ impl PyNode {
         PyNode(Rc::new(RefCell::new(node)))
     }
 
-    // fn block(block: PyAny) {
-    //     // let node = ThrillerNode::new(ThrillerNodeInner::Block(Rc::clone(&block.0)));
-    //     // PyNode(Rc::new(RefCell::new(node)))
-    // }
+    #[staticmethod]
+    fn block(block: PyRef<PyBlock>) -> Self {
+        let node = ThrillerNode::new(ThrillerNodeInner::Block(Rc::clone(&block.0)));
+        PyNode(Rc::new(RefCell::new(node)))
+    }
 
+    #[staticmethod]
     fn gemm(a: PyRef<PyNode>, b: PyRef<PyNode>, c: PyRef<PyNode>) -> Self {
         let access_map = AccessMap::new(0, vec![]);
 
