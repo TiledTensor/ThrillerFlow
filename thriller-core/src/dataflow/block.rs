@@ -47,9 +47,9 @@ impl ThrillerBlock {
 
         // Generate loop.
         for ivar in self.ivars.iter() {
-            let (upper, lower) = ivar.get_domain();
+            let (lower, upper) = ivar.get_domain();
 
-            code += match (upper, lower) {
+            code += match (lower, upper) {
                 (IterationBound::Fixed(lower), IterationBound::Fixed(upper)) => {
                     format!(
                         "{indent}for(int {ivar} = {lower}; {ivar} < {upper}; ++{ivar}){{\n",
