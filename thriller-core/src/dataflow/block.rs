@@ -274,6 +274,9 @@ impl ThrillerBlock {
 
         code += self.emit_sync()?.as_str();
 
+        // TODO(KuangjuX): Determine whether the `store` operation is
+        // codegen inside or outside the nested loop based on the
+        // [`AccessMap`].
         code += self.emit_store()?.as_str();
 
         Ok(code)
