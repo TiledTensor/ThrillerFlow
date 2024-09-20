@@ -1,10 +1,12 @@
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+use pyo3::PyObject;
 
 use thriller_core::{
     AccessMap, Gemm, Task, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 
+use crate::block::PyBlock;
 use crate::buffer::PyBuffer;
 
 use std::{cell::RefCell, rc::Rc};
@@ -69,6 +71,11 @@ impl PyNode {
         let node = ThrillerNode::new(thriller_core::ThrillerNodeInner::Buffer(Rc::clone(&buf.0)));
         PyNode(Rc::new(RefCell::new(node)))
     }
+
+    // fn block(block: PyAny) {
+    //     // let node = ThrillerNode::new(ThrillerNodeInner::Block(Rc::clone(&block.0)));
+    //     // PyNode(Rc::new(RefCell::new(node)))
+    // }
 
     fn gemm(a: PyRef<PyNode>, b: PyRef<PyNode>, c: PyRef<PyNode>) -> Self {
         let access_map = AccessMap::new(0, vec![]);

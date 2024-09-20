@@ -7,7 +7,7 @@ use pyo3::{prelude::*, types::PyList};
 use crate::{access::PyAccessMap, buffer::PyBuffer, graph::PyGraph, var::PyIterationVar};
 
 #[pyclass(unsendable, module = "block", name = "Block")]
-pub struct PyBlock(pub ThrillerBlock);
+pub struct PyBlock(pub Rc<ThrillerBlock>);
 
 #[pyclass(unsendable, module = "block", name = "AttachedEdge")]
 pub struct PyAttachedEdge(pub Rc<AttachedEdge>);
@@ -52,7 +52,7 @@ impl PyBlock {
 
         let block = ThrillerBlock::new(inputs, outputs, subgraph, ivars);
 
-        Ok(PyBlock(block))
+        Ok(PyBlock(Rc::new(block)))
     }
 
     fn codegen(&self) -> PyResult<String> {
