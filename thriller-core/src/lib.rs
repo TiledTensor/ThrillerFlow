@@ -25,6 +25,9 @@
 //!   acyclic graph.
 //! - [`Buffer`] represents an addressable instance declared in user mode, which contains
 //!   [`Shape`], [`Layout`] and [`BufType`].
+//!
+//! ThrillerFlow will generate the code of the ETDG by on-pass based on **Macro Kernel**
+//! written in [TiledCUDA](https://github.com/TiledTensor/TiledCUDA)
 
 #![deny(warnings)]
 #![deny(missing_docs)]
