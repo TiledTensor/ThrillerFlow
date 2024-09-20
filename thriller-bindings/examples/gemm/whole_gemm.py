@@ -1,5 +1,5 @@
 '''
-Whole GEMM is an example of GEMM that utilized all mempry hierarchies
+Whole GEMM is an example of GEMM that utilizes all memory hierarchies
 of NVIDIA GPU.
 '''
 import context

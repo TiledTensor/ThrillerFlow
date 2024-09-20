@@ -63,11 +63,11 @@ if __name__ == '__main__':
         access_dims, [[[1]], [[0]]], [[0], [10]], [LoopIter])
 
     EdgeA_Gemm = Edge(NodeA, GemmNode)
-    EdgeB_GEMM = Edge(NodeB, GemmNode)
+    EdgeB_Gemm = Edge(NodeB, GemmNode)
     EdgeGemm_Acc = Edge(GemmNode, NodeAcc)
 
     RegGraph.add_nodes([NodeA, NodeB, NodeAcc, GemmNode])
-    RegGraph.add_edges([EdgeA_Gemm, EdgeB_GEMM, EdgeGemm_Acc])
+    RegGraph.add_edges([EdgeA_Gemm, EdgeB_Gemm, EdgeGemm_Acc])
 
     RegGraph.connect()
 
