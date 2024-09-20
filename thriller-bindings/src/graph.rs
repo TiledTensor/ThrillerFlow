@@ -66,7 +66,7 @@ pub struct PyNode(pub Rc<RefCell<ThrillerNode>>);
 #[pymethods]
 impl PyNode {
     #[staticmethod]
-    fn tensor(buf: &PyBuffer) -> Self {
+    fn tensor(buf: PyRef<PyBuffer>) -> Self {
         let node = ThrillerNode::new(thriller_core::ThrillerNodeInner::Buffer(Rc::clone(&buf.0)));
         PyNode(Rc::new(RefCell::new(node)))
     }
