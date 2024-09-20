@@ -50,9 +50,9 @@ impl ThrillerBlock {
             let (upper, lower) = ivar.get_domain();
 
             code += match (upper, lower) {
-                (IterationBound::Fixed(upper), IterationBound::Fixed(lower)) => {
+                (IterationBound::Fixed(lower), IterationBound::Fixed(upper)) => {
                     format!(
-                        "{indent}for(int {ivar} = {lower}; {ivar} < {upper}; {ivar}++){{\n",
+                        "{indent}for(int {ivar} = {lower}; {ivar} < {upper}; ++{ivar}){{\n",
                         indent = " ".repeat(indent),
                         ivar = ivar.get_name(),
                         lower = lower,
@@ -95,8 +95,6 @@ impl ThrillerBlock {
 
             let sbuf = &edge.src;
             let dbuf = &edge.dst;
-
-            // TODO(KuangjuX): Support Access Memory code generation.
 
             let sbuf_var = sbuf.get_name();
             let dbuf_var = dbuf.get_name();
@@ -198,6 +196,17 @@ impl ThrillerBlock {
                 (BufType::RegTile, BufType::GlobalTile) => {
                     code += format!(
                         "storer_tile_r2g_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        sid = sbuf_id,
+                        did = dbuf_id,
+                        sbuf_var = sbuf_var,
+                        dbuf_var = dbuf_var
+                    )
+                    .as_str();
+                }
+
+                (BufType::RegTile, BufType::SharedTile) => {
+                    code += format!(
+                        "storer_tile_r2s_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
                         sid = sbuf_id,
                         did = dbuf_id,
                         sbuf_var = sbuf_var,

@@ -17,6 +17,7 @@ impl PyIterationVar {
             IterationBound::Fixed(domain.0),
             IterationBound::Fixed(domain.1),
         );
+        println!("domain: {:?}", domain_bound);
         let var = IterationVar::new(&name, domain_bound);
         PyIterationVar(Rc::new(var))
     }
