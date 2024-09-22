@@ -109,9 +109,17 @@ if __name__ == '__main__':
     AccessMapSB2RB = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarI])
     # AccessMapAcc2SC = AccessMap([0], [[[]], [[]]], [[], []], [])
 
+    # Build AccessMap from gA, gB load into sA, sB.
+    AccessMapGA2SA = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
+    AccessMapGB2SB = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
+
     # Build Attached Edge for load sA, sB into rA, rB.
     AttachedEdgeSA2RA = AttachedEdge(sA, rA, AccessMapSA2RA)
     AttachedEdgeSB2RB = AttachedEdge(sB, rB, AccessMapSB2RB)
+
+    # Build Attached Edge for load gA, gB into sA, sB.
+    AttachedEdgeGA2SA = AttachedEdge(gA, sA, AccessMapGA2SA)
+    AttachedEdgeGB2SB = AttachedEdge(gB, sB, AccessMapGB2SB)
 
     # Build rA, rB, Acc, Gemm Graph.
     RegABGemmGraph = Graph()
@@ -125,3 +133,28 @@ if __name__ == '__main__':
 
     # Print codegen for Reg Graph.
     print(RegABGemmGraph.codegen())
+
+    # Build Block for adding attached edge sA, sB into rA, rB.
+    BlockRegABGemm = Block(
+        [AttachedEdgeSA2RA, AttachedEdgeSB2RB], [], RegABGemmGraph, [IterVarI])
+    # Print codegen for Block.
+    print(BlockRegABGemm.codegen())
+
+    # Define Block Node for `BlockRegABGemm`.
+    BlockRegABGemmNode = Node.block(BlockRegABGemm)
+
+    # Build Graph for BlockRegABGemm.
+    BlockRegABGemmGraph = Graph()
+    # Add Nodes to the Graph.
+    BlockRegABGemmGraph.add_nodes([BlockRegABGemmNode])
+
+    # Connect the Graph.
+    BlockRegABGemmGraph.connect()
+    # Print codegen for BlockRegABGemmGraph.
+    print(BlockRegABGemmGraph.codegen())
+
+    # Build Block for adding attached edge gA, gB into sA, sB.
+    BlockSharedABGemm = Block(
+        [AttachedEdgeGA2SA, AttachedEdgeGB2SB], [], BlockRegABGemmGraph, [IterVarK])
+    # Print codegen for Block.
+    print(BlockSharedABGemm.codegen())
