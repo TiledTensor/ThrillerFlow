@@ -111,7 +111,8 @@ if __name__ == '__main__':
 
     # Build AccessMap from gA, gB load into sA, sB.
     AccessMapGA2SA = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
-    AccessMapGB2SB = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
+    AccessMapGB2SB = AccessMap([0], [[[1, 0], [0, 1]], [[0, 0]]], [
+                               [0, 0], [0]], [IterVarK, IterVarN])
 
     # Build Attached Edge for load sA, sB into rA, rB.
     AttachedEdgeSA2RA = AttachedEdge(sA, rA, AccessMapSA2RA)
