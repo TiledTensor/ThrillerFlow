@@ -107,20 +107,43 @@ if __name__ == '__main__':
     # Build AccessMap from sA, sB load into rA, rB.
     AccessMapSA2RA = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarI])
     AccessMapSB2RB = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarI])
-    # AccessMapAcc2SC = AccessMap([0], [[[]], [[]]], [[], []], [])
+
+    # Build AccessMap from sC load into rC.
+    AccessMapSC2RC = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
 
     # Build AccessMap from gA, gB load into sA, sB.
     AccessMapGA2SA = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
     AccessMapGB2SB = AccessMap([0], [[[1, 0], [0, 1]], [[0, 0]]], [
                                [0, 0], [0]], [IterVarK, IterVarN])
 
+    # Build AccessMap from gC load into sC.
+    AccessMapGC2SC = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarN])
+
+    # Build AccessMap from rAcc store into sD.
+    AccessMapRAcc2GD = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [])
+
+    # Build AccessMap from sD store into gD.
+    AccessMapSD2GD = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [])
+
     # Build Attached Edge for load sA, sB into rA, rB.
     AttachedEdgeSA2RA = AttachedEdge(sA, rA, AccessMapSA2RA)
     AttachedEdgeSB2RB = AttachedEdge(sB, rB, AccessMapSB2RB)
 
+    # Build Attached Edge for load sC into rC.
+    AttachedEdgeSC2RC = AttachedEdge(sC, rC, AccessMapSC2RC)
+
     # Build Attached Edge for load gA, gB into sA, sB.
     AttachedEdgeGA2SA = AttachedEdge(gA, sA, AccessMapGA2SA)
     AttachedEdgeGB2SB = AttachedEdge(gB, sB, AccessMapGB2SB)
+
+    # Build Attached Edge for load gC into sC.
+    AttachedEdgeGC2SC = AttachedEdge(gC, sC, AccessMapGC2SC)
+
+    # Build Attached Edge for store rAcc into sD.
+    # AttachedEdgeRAcc2SD = AttachedEdge(rAcc, sD, AccessMapRAcc2GD)
+
+    # Build Attached Edge for store sD into gD.
+    AttachedEdgeSD2GD = AttachedEdge(sD, gD, AccessMapSD2GD)
 
     # Build rA, rB, Acc, Gemm Graph.
     RegABGemmGraph = Graph()
@@ -156,6 +179,26 @@ if __name__ == '__main__':
 
     # Build Block for adding attached edge gA, gB into sA, sB.
     BlockSharedABGemm = Block(
-        [AttachedEdgeGA2SA, AttachedEdgeGB2SB], [], BlockRegABGemmGraph, [IterVarK])
+        [AttachedEdgeGA2SA, AttachedEdgeGB2SB, AttachedEdgeSC2RC], [], BlockRegABGemmGraph, [IterVarK])
     # Print codegen for Block.
     print(BlockSharedABGemm.codegen())
+
+    # Build Node for `BlockSharedABGemm`.
+    BlockSharedABGemmNode = Node.block(BlockSharedABGemm)
+
+    # Build Graph for BlockSharedABGemm.
+    BlockSharedABGemmGraph = Graph()
+    # Add Nodes to the Graph.
+    BlockSharedABGemmGraph.add_nodes([BlockSharedABGemmNode])
+
+    # Connect the Graph.
+    BlockSharedABGemmGraph.connect()
+    # Print codegen for BlockSharedABGemmGraph.
+    print(BlockSharedABGemmGraph.codegen())
+
+    # Build Block for adding attached edge gC into sC.
+    BlockSharedCGemm = Block(
+        [AttachedEdgeGC2SC], [AttachedEdgeSD2GD], BlockSharedABGemmGraph, [IterVarN])
+
+    # Print codegen for Block.
+    print(BlockSharedCGemm.codegen())
