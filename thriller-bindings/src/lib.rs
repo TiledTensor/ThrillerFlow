@@ -4,6 +4,7 @@
 #![deny(missing_docs)]
 
 use access::PyAccessMap;
+use dtype::PyDType;
 use pyo3::prelude::*;
 
 use block::{PyAttachedEdge, PyBlock};
@@ -16,6 +17,7 @@ use var::PyIterationVar;
 mod access;
 mod block;
 mod buffer;
+mod dtype;
 mod graph;
 mod op;
 mod var;
@@ -35,18 +37,14 @@ fn thriller_flow(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyBuffer>()?;
     m.add_class::<PyLayout>()?;
     m.add_class::<PyBufType>()?;
-
+    m.add_class::<PyDType>()?;
     m.add_class::<PyGraph>()?;
     m.add_class::<PyNode>()?;
     m.add_class::<PyEdge>()?;
-
     m.add_class::<PyGemm>()?;
-
     m.add_class::<PyBlock>()?;
     m.add_class::<PyAttachedEdge>()?;
-
     m.add_class::<PyIterationVar>()?;
-
     m.add_class::<PyAccessMap>()?;
 
     Ok(())

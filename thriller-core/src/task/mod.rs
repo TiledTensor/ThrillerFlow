@@ -3,7 +3,7 @@ use crate::ThrillerResult;
 mod compute;
 mod copy;
 
-pub use compute::Gemm;
+pub use compute::{Convert, Gemm};
 
 /// A trait to represent a task.
 pub trait Task {

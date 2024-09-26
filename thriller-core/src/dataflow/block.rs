@@ -142,24 +142,28 @@ impl ThrillerBlock {
                 (BufType::SharedTile, BufType::RegTile) => {
                     insert_copy_async = true;
                     code += format!(
-                        "{indent}loader_tile_s2r_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        "{indent}loader_tile_s2r_{sid}_to_{did}({sbuf_var}({src_access}), {dbuf_var}({target_access}));\n",
                         indent = indent,
                         sid = sbuf_id,
                         did = dbuf_id,
                         sbuf_var = sbuf_var,
-                        dbuf_var = dbuf_var
+                        src_access = source_access_code,
+                        dbuf_var = dbuf_var,
+                        target_access = target_access_code
                     )
                     .as_str();
                 }
 
                 (BufType::GlobalTile, BufType::SharedTile) => {
                     code += format!(
-                        "{indent}loader_tile_g2s_{sid}_to_{did}({sbuf_var}, {dbuf_var});\n",
+                        "{indent}loader_tile_g2s_{sid}_to_{did}({sbuf_var}({src_access}), {dbuf_var}({target_access}));\n",
                         indent = indent,
                         sid = sbuf_id,
                         did = dbuf_id,
                         sbuf_var = sbuf_var,
-                        dbuf_var = dbuf_var
+                        src_access = source_access_code,
+                        dbuf_var = dbuf_var,
+                        target_access = target_access_code
                     )
                     .as_str();
                 }

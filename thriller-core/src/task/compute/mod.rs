@@ -1,10 +1,5 @@
 mod gemm;
-
-#[allow(dead_code)]
-/// Compute Type.
-pub enum Compute {
-    Gemm,
-    Axpby,
-}
+mod map;
 
 pub use gemm::Gemm;
+pub use map::Convert;
