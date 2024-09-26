@@ -16,6 +16,7 @@ use var::PyIterationVar;
 mod access;
 mod block;
 mod buffer;
+mod dtype;
 mod graph;
 mod op;
 mod var;

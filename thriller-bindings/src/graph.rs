@@ -2,11 +2,12 @@ use pyo3::prelude::*;
 use pyo3::types::PyList;
 
 use thriller_core::{
-    AccessMap, Gemm, Task, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
+    AccessMap, Convert, DataType, Gemm, Task, ThrillerEdge, ThrillerGraph, ThrillerNode,
+    ThrillerNodeInner,
 };
 
-use crate::block::PyBlock;
 use crate::buffer::PyBuffer;
+use crate::{block::PyBlock, dtype::PyDType};
 
 use std::{cell::RefCell, rc::Rc};
 
@@ -88,6 +89,36 @@ impl PyNode {
         let gemm = Gemm::new(vec![node_a, node_b], node_c, Rc::new(access_map));
 
         let node = ThrillerNode::new(ThrillerNodeInner::Op(Box::new(gemm)));
+
+        PyNode(Rc::new(RefCell::new(node)))
+    }
+
+    #[staticmethod]
+    fn cast(
+        src: PyRef<PyBuffer>,
+        dst: PyRef<PyBuffer>,
+        sdtype: PyRef<PyDType>,
+        ddtype: PyRef<PyDType>,
+    ) -> Self {
+        let sdtype = match *sdtype {
+            PyDType::F32 => DataType::Float32,
+            PyDType::F64 => DataType::Float64,
+            PyDType::Half => DataType::Half,
+            PyDType::CutlassHalf => DataType::Cutlasshalf,
+        };
+
+        let ddtype = match *ddtype {
+            PyDType::F32 => DataType::Float32,
+            PyDType::F64 => DataType::Float64,
+            PyDType::Half => DataType::Half,
+            PyDType::CutlassHalf => DataType::Cutlasshalf,
+        };
+
+        let sbuf = Rc::clone(&src.0);
+        let dbuf = Rc::clone(&dst.0);
+
+        let cast = Convert::new(sbuf, dbuf, sdtype, ddtype);
+        let node = ThrillerNode::new(ThrillerNodeInner::Op(Box::new(cast)));
 
         PyNode(Rc::new(RefCell::new(node)))
     }

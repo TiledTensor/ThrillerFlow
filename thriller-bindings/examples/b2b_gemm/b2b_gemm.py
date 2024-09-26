@@ -77,6 +77,9 @@ if __name__ == '__main__':
     # Define A, B, Acc to GEMM Node.
     RegABGemmCNode = Node.gemm(NodeRA, NodeRB, NodeRAcc)
 
+    # Define Acc, C, D to GEMM Node.
+    RegAccCGemmDNode = Node.gemm(NodeRAcc, NodeRD, NodeRC)
+
     # Define Shared Node for A, B, C, D.
     NodeSA = Node.tensor(sA)
     NodeSB = Node.tensor(sB)
@@ -109,7 +112,7 @@ if __name__ == '__main__':
     AccessMapSB2RB = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarI])
 
     # Build AccessMap from sC load into rC.
-    AccessMapSC2RC = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
+    AccessMapSC2RC = AccessMap([0], [[], []], [[], []], [])
 
     # Build AccessMap from gA, gB load into sA, sB.
     AccessMapGA2SA = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [IterVarK])
@@ -179,7 +182,7 @@ if __name__ == '__main__':
 
     # Build Block for adding attached edge gA, gB into sA, sB.
     BlockSharedABGemm = Block(
-        [AttachedEdgeGA2SA, AttachedEdgeGB2SB, AttachedEdgeSC2RC], [], BlockRegABGemmGraph, [IterVarK])
+        [AttachedEdgeGA2SA, AttachedEdgeGB2SB], [], BlockRegABGemmGraph, [IterVarK])
     # Print codegen for Block.
     print(BlockSharedABGemm.codegen())
 
@@ -189,7 +192,13 @@ if __name__ == '__main__':
     # Build Graph for BlockSharedABGemm.
     BlockSharedABGemmGraph = Graph()
     # Add Nodes to the Graph.
-    BlockSharedABGemmGraph.add_nodes([BlockSharedABGemmNode])
+    BlockSharedABGemmGraph.add_nodes([BlockSharedABGemmNode, RegAccCGemmDNode])
+
+    # Build Edge for connecting BlockSharedABGemmNode and RegAccCGemmDNode.
+    EdgeRegABGemmGraphRegAccCGemmDNode = Edge(
+        BlockSharedABGemmNode, RegAccCGemmDNode)
+    # Add Edges to the Graph.
+    BlockSharedABGemmGraph.add_edges([EdgeRegABGemmGraphRegAccCGemmDNode])
 
     # Connect the Graph.
     BlockSharedABGemmGraph.connect()
@@ -198,7 +207,7 @@ if __name__ == '__main__':
 
     # Build Block for adding attached edge gC into sC.
     BlockSharedCGemm = Block(
-        [AttachedEdgeGC2SC], [AttachedEdgeSD2GD], BlockSharedABGemmGraph, [IterVarN])
+        [AttachedEdgeGC2SC, AttachedEdgeSC2RC], [AttachedEdgeSD2GD], BlockSharedABGemmGraph, [IterVarN])
 
     # Print codegen for Block.
     print(BlockSharedCGemm.codegen())

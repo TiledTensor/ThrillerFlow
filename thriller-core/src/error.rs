@@ -13,6 +13,8 @@ pub enum ThrillerError {
     WrongInputsNum,
     /// Failed to perform file operation.
     FailedFileOp,
+    /// Failed to parse the gieven string.
+    ParseError,
 }
 
 /// Result type for thriller crate functions.

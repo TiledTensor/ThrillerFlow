@@ -35,6 +35,7 @@
 mod access;
 mod buffer;
 mod dataflow;
+mod dtype;
 mod engine;
 mod error;
 mod id;
@@ -49,11 +50,12 @@ pub use buffer::{BufType, Buffer};
 pub use dataflow::{
     AttachedEdge, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
+pub use dtype::DataType;
 pub use engine::{BlockLayout, BlockShape, ThrillerEngine};
 pub use error::{ThrillerError, ThrillerResult};
 pub use log::{debug, error, info, init_logger, set_max_level, trace, warn};
 pub use shape::{Dim, Dimension, Layout, Shape};
-pub use task::{Gemm, Task};
+pub use task::{Convert, Gemm, Task};
 pub use var::{IterationBound, IterationVar, RegularVar, Var};
 
 use id::ID_COUNTER;

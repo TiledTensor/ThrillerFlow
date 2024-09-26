@@ -1,4 +1,5 @@
 mod gemm;
+mod map;
 
 #[allow(dead_code)]
 /// Compute Type.
@@ -8,3 +9,4 @@ pub enum Compute {
 }
 
 pub use gemm::Gemm;
+pub use map::Convert;
