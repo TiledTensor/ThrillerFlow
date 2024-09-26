@@ -2,7 +2,7 @@ use crate::shape::Ix;
 use crate::{next_id, Dim, Layout, Shape};
 
 /// Buffer type.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BufType {
     /// Global Tile
     GlobalTile,

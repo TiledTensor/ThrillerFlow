@@ -21,6 +21,14 @@ impl Convert {
         src_type: DataType,
         dst_type: DataType,
     ) -> Self {
+        // `src_buf` and `dst_buf` must have the same typing.
+        // TODO(KuanjuX): Don't use assert here.
+        assert_eq!(src_buf.get_typing(), dst_buf.get_typing());
+
+        // `src_buf` and `dst_buf` must have the same shape.
+        // TODO(KuanjuX): Don't use assert here.
+        assert_eq!(src_buf.get_shape(), dst_buf.get_shape());
+
         Self {
             src_buf,
             dst_buf,
