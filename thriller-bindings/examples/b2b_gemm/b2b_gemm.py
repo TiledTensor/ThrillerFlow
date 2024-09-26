@@ -134,8 +134,11 @@ if __name__ == '__main__':
     # Build AccessMap from rAcc store into sD.
     AccessMapRAcc2GD = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [])
 
+    # Build AccessMap from rD store into sD.
+    AccessMapRD2SD = AccessMap([0], [[], []], [[], []], [])
+
     # Build AccessMap from sD store into gD.
-    AccessMapSD2GD = AccessMap([0], [[[1]], [[0]]], [[0], [0]], [])
+    AccessMapSD2GD = AccessMap([0], [[], []], [[], []], [])
 
     # Build Attached Edge for load sA, sB into rA, rB.
     AttachedEdgeSA2RA = AttachedEdge(sA, rA, AccessMapSA2RA)
@@ -153,6 +156,9 @@ if __name__ == '__main__':
 
     # Build Attached Edge for store rAcc into sD.
     # AttachedEdgeRAcc2SD = AttachedEdge(rAcc, sD, AccessMapRAcc2GD)
+
+    # Build Attached Edge for store rD into sD.
+    AttachedEdgeRD2SD = AttachedEdge(rD, sD, AccessMapRD2SD)
 
     # Build Attached Edge for store sD into gD.
     AttachedEdgeSD2GD = AttachedEdge(sD, gD, AccessMapSD2GD)
@@ -220,7 +226,7 @@ if __name__ == '__main__':
 
     # Build Block for adding attached edge gC into sC.
     BlockSharedCGemm = Block(
-        [AttachedEdgeGC2SC, AttachedEdgeSC2RC], [AttachedEdgeSD2GD], BlockSharedABGemmGraph, [IterVarN])
+        [AttachedEdgeGC2SC, AttachedEdgeSC2RC], [AttachedEdgeRD2SD, AttachedEdgeSD2GD], BlockSharedABGemmGraph, [IterVarN])
 
     # Print codegen for Block.
     print(BlockSharedCGemm.codegen())
