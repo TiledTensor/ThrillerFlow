@@ -154,9 +154,6 @@ if __name__ == '__main__':
     # Build Attached Edge for load gC into sC.
     AttachedEdgeGC2SC = AttachedEdge(gC, sC, AccessMapGC2SC)
 
-    # Build Attached Edge for store rAcc into sD.
-    # AttachedEdgeRAcc2SD = AttachedEdge(rAcc, sD, AccessMapRAcc2GD)
-
     # Build Attached Edge for store rD into sD.
     AttachedEdgeRD2SD = AttachedEdge(rD, sD, AccessMapRD2SD)
 
