@@ -25,7 +25,7 @@ pub trait Dimension {
 }
 
 /// Stride description.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Layout<D> {
     /// Row-major
     RowMajor,
@@ -54,7 +54,7 @@ where
 ///
 /// [`Dim`] describes the number of axes and the length of each axis
 /// in an array. It is also used as an index type.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Dim {
     dims: SmallVec<[Ix; 4]>,
     ndim: usize,
@@ -140,7 +140,7 @@ impl Dimension for Dim {
 }
 
 /// Shape description.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Shape {
     dims: Dim,
     layout: Layout<Dim>,
