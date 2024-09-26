@@ -5,7 +5,7 @@ import context
 
 from pythriller import initialize_thriller_flow, Layout, Tensor, TensorType
 from pythriller import Graph, Node, Edge, AttachedEdge, IterationVar, AccessMap
-from pythriller import Block
+from pythriller import Block, DType
 
 if __name__ == '__main__':
     # Initialize the Thriller flow runtime.
@@ -55,6 +55,7 @@ if __name__ == '__main__':
     rC = Tensor("rC", RegDimC, RegLayoutC, TensorType.RegTile)
     rD = Tensor("rD", RegDimD, RegLayoutD, TensorType.RegTile)
     rAcc = Tensor("rAcc", RegDimAcc, RegLayoutAcc, TensorType.RegTile)
+    rAccHalf = Tensor("rAccHalf", RegDimAcc, RegLayoutAcc, TensorType.RegTile)
 
     # Define Shared Tensor for A, B, C, D.
     sA = Tensor("sA", SharedDimA, SharedLayoutA, TensorType.SharedTile)
@@ -74,11 +75,15 @@ if __name__ == '__main__':
     NodeRC = Node.tensor(rC)
     NodeRD = Node.tensor(rD)
     NodeRAcc = Node.tensor(rAcc)
+    NodeRAccHalf = Node.tensor(rAccHalf)
     # Define A, B, Acc to GEMM Node.
     RegABGemmCNode = Node.gemm(NodeRA, NodeRB, NodeRAcc)
 
     # Define Acc, C, D to GEMM Node.
-    RegAccCGemmDNode = Node.gemm(NodeRAcc, NodeRD, NodeRC)
+    RegAccCGemmDNode = Node.gemm(NodeRAccHalf, NodeRC, NodeRD)
+
+    # Build Cast Node for Acc -> Half
+    AccCastNode = Node.cast(rAcc, rAccHalf, DType.F32, DType.Half)
 
     # Define Shared Node for A, B, C, D.
     NodeSA = Node.tensor(sA)
@@ -96,6 +101,10 @@ if __name__ == '__main__':
     RegEdgeA = Edge(NodeRA, RegABGemmCNode)
     RegEdgeB = Edge(NodeRB, RegABGemmCNode)
     RegEdgeAcc = Edge(NodeRAcc, RegABGemmCNode)
+
+    # Define Edge for NodeRAcc, AccCastNode, NodeRAccHalf
+    EdgeAccCastIn = Edge(NodeRAcc, AccCastNode)
+    EdgeAccCastOut = Edge(AccCastNode, NodeRAccHalf)
 
     # Define iteration variable for A, B, Acc, Gemm loop.
     # Iterate over the register tiles along the kTK dimension.
@@ -192,13 +201,17 @@ if __name__ == '__main__':
     # Build Graph for BlockSharedABGemm.
     BlockSharedABGemmGraph = Graph()
     # Add Nodes to the Graph.
-    BlockSharedABGemmGraph.add_nodes([BlockSharedABGemmNode, RegAccCGemmDNode])
+    BlockSharedABGemmGraph.add_nodes(
+        [BlockSharedABGemmNode, AccCastNode, RegAccCGemmDNode])
 
     # Build Edge for connecting BlockSharedABGemmNode and RegAccCGemmDNode.
-    EdgeRegABGemmGraphRegAccCGemmDNode = Edge(
-        BlockSharedABGemmNode, RegAccCGemmDNode)
+    EdgeBlockCast = Edge(
+        BlockSharedABGemmNode, AccCastNode)
+
+    EdgeCastGemm = Edge(AccCastNode, RegAccCGemmDNode)
+
     # Add Edges to the Graph.
-    BlockSharedABGemmGraph.add_edges([EdgeRegABGemmGraphRegAccCGemmDNode])
+    BlockSharedABGemmGraph.add_edges([EdgeBlockCast, EdgeCastGemm])
 
     # Connect the Graph.
     BlockSharedABGemmGraph.connect()

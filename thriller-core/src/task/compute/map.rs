@@ -33,7 +33,7 @@ impl Convert {
 impl Task for Convert {
     fn emit(&self) -> ThrillerResult<String> {
         Ok(format!(
-            "cast_{src_type}_to_{dst_type}({src_buf} -> {dst_buf});",
+            "cast_{src_type}_to_{dst_type}({src_buf}, {dst_buf});\n",
             src_type = self.src_type,
             dst_type = self.dst_type,
             src_buf = self.src_buf.get_name(),
