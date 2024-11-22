@@ -33,6 +33,7 @@
 #![deny(missing_docs)]
 
 mod access;
+mod backend;
 mod buffer;
 mod dataflow;
 mod dtype;

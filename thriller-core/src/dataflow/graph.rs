@@ -14,8 +14,8 @@ use crate::{next_id, ThrillerResult};
 pub struct ThrillerGraph {
     #[allow(dead_code)]
     id: usize,
-    nodes: Vec<Rc<RefCell<ThrillerNode>>>,
-    edges: Vec<Rc<ThrillerEdge>>,
+    pub(crate) nodes: Vec<Rc<RefCell<ThrillerNode>>>,
+    pub(crate) edges: Vec<Rc<ThrillerEdge>>,
 }
 
 impl ThrillerGraph {
