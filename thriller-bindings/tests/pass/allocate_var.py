@@ -1,7 +1,3 @@
-'''
-Whole GEMM is an example of GEMM that utilizes all memory hierarchies
-of NVIDIA GPU.
-'''
 import context
 
 from pythriller import initialize_thriller_flow, Layout, Tensor, TensorType
@@ -123,7 +119,6 @@ if __name__ == '__main__':
 
     # Print codegen for Reg Graph.
     reg_code = RegGraph.codegen()
-    print(reg_code)
 
     # Build Block for Shared to Register.
     SharedToRegBlock = Block(
@@ -131,7 +126,6 @@ if __name__ == '__main__':
 
     # Print codegen for Shared to Register Block.
     shared_to_reg_code = SharedToRegBlock.codegen()
-    print(shared_to_reg_code)
 
     # Define BlockNode for SharedToRegBlock
     SharedBlockNode = Node.block(SharedToRegBlock)
@@ -150,14 +144,5 @@ if __name__ == '__main__':
     # Connect Shared Graph.
     SharedGraph.connect()
 
-    # Print codegen for Shared Graph.
-    shared_code = SharedGraph.codegen()
-    print(shared_code)
-
-    # Build Block for Global to Shared.
-    GlobalToSharedBlock = Block(
-        [AttachedEdgeGA2SA, AttachedEdgeGB2SB], [AttachedEdgeSC2GC], SharedGraph, [LoopIterG2S])
-
-    # Print codegen for Global to Shared Block.
-    global_to_shared_code = GlobalToSharedBlock.codegen()
-    print(global_to_shared_code)
+    allocate_vars = SharedGraph.allocate_var()
+    print(allocate_vars)

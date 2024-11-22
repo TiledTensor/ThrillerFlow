@@ -1,8 +1,23 @@
 use super::GraphPass;
 use crate::{dataflow::ThrillerGraph, BufType, ThrillerNodeInner};
 
+/// AllocateVar
 pub struct AllocateVar {
     code: String,
+}
+
+impl AllocateVar {
+    #[doc(hidden)]
+    pub fn new() -> Self {
+        Self {
+            code: String::new(),
+        }
+    }
+
+    #[doc(hidden)]
+    pub fn code(&self) -> String {
+        self.code.clone()
+    }
 }
 
 impl GraphPass for AllocateVar {
@@ -27,7 +42,7 @@ impl GraphPass for AllocateVar {
 
                         &BufType::RegTile | &BufType::RegVec => {
                             self.code +=
-                                format!("Shared{} {};\n", buf.get_name(), buf.get_name()).as_str();
+                                format!("Reg{} {};\n", buf.get_name(), buf.get_name()).as_str();
                         }
                     }
                 }
