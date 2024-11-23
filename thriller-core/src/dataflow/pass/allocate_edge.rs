@@ -9,6 +9,18 @@ pub struct AllocateEdge {
 }
 
 impl AllocateEdge {
+    #[doc(hidden)]
+    pub fn new() -> Self {
+        Self {
+            code: String::new(),
+        }
+    }
+
+    #[doc(hidden)]
+    pub fn code(&self) -> String {
+        self.code.clone()
+    }
+
     pub(crate) fn allocate_edge(&mut self, edge: &Rc<AttachedEdge>) {
         let in_edge_type = edge.src.get_typing();
         let in_edge_name = edge.src.get_name();
@@ -17,9 +29,35 @@ impl AllocateEdge {
 
         match (in_edge_type, out_edge_type) {
             (&BufType::GlobalTile, &BufType::SharedTile) => {
-                self.code += format!("G2SLoader{}_{}", in_edge_name, out_edge_name).as_str();
+                self.code += format!(
+                    "G2SLoader{}_{} g2s{}_{};\n",
+                    in_edge_name, out_edge_name, in_edge_name, out_edge_name
+                )
+                .as_str();
             }
-            _ => todo!(),
+            (&BufType::SharedTile, &BufType::RegTile) => {
+                self.code += format!(
+                    "S2RLoader{}_{} s2r{}_{};\n",
+                    in_edge_name, out_edge_name, in_edge_name, out_edge_name
+                )
+                .as_str();
+            }
+            (&BufType::RegTile, &BufType::SharedTile) => {
+                self.code += format!(
+                    "R2SStorer{}_{} r2s{}_{};\n",
+                    in_edge_name, out_edge_name, in_edge_name, out_edge_name
+                )
+                .as_str();
+            }
+
+            (&BufType::SharedTile, &BufType::GlobalTile) => {
+                self.code += format!(
+                    "S2GStorer{}_{} s2g{}_{};\n",
+                    in_edge_name, out_edge_name, in_edge_name, out_edge_name
+                )
+                .as_str();
+            }
+            _ => {}
         }
     }
 }

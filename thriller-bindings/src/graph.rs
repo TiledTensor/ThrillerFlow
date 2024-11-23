@@ -2,8 +2,8 @@ use pyo3::prelude::*;
 use pyo3::types::PyList;
 
 use thriller_core::{
-    AccessMap, AllocateVar, Convert, DataType, Gemm, GraphPass, Task, ThrillerEdge, ThrillerGraph,
-    ThrillerNode, ThrillerNodeInner,
+    AccessMap, AllocateEdge, AllocateVar, Convert, DataType, Gemm, GraphPass, Task, ThrillerEdge,
+    ThrillerGraph, ThrillerNode, ThrillerNodeInner,
 };
 
 use crate::buffer::PyBuffer;
@@ -53,9 +53,16 @@ impl PyGraph {
         self.0.borrow_mut().connect();
     }
 
-    fn allocate_var(&mut self) -> PyResult<String> {
+    fn allocate_vars(&mut self) -> PyResult<String> {
         let mut graph = self.0.borrow_mut();
         let mut pass = AllocateVar::new();
+        pass.run(&mut graph);
+        Ok(pass.code().clone())
+    }
+
+    fn allocate_edges(&mut self) -> PyResult<String> {
+        let mut graph = self.0.borrow_mut();
+        let mut pass = AllocateEdge::new();
         pass.run(&mut graph);
         Ok(pass.code().clone())
     }

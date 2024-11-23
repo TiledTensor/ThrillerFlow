@@ -144,5 +144,5 @@ if __name__ == '__main__':
     # Connect Shared Graph.
     SharedGraph.connect()
 
-    allocate_vars = SharedGraph.allocate_vars()
-    print(allocate_vars)
+    allocate_edges = SharedGraph.allocate_edges()
+    print(allocate_edges)

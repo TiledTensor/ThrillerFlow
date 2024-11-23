@@ -4,6 +4,7 @@ mod allocate_edge;
 mod allocate_var;
 mod gen_iterator;
 
+pub use allocate_edge::AllocateEdge;
 pub use allocate_var::AllocateVar;
 
 /// A trait for graph passes.

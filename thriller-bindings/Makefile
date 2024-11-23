@@ -1,4 +1,4 @@
-TEST ?= pass/allocate_var.py
+TEST ?= pass/allocate_edge.py
 TEST_DIR := tests
 
 .PHONY: build test

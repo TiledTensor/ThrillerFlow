@@ -49,8 +49,8 @@ mod var;
 pub use access::{AccessMap, AccessMatrix, AccessOffset};
 pub use buffer::{BufType, Buffer};
 pub use dataflow::{
-    AllocateVar, AttachedEdge, GraphPass, ThrillerBlock, ThrillerEdge, ThrillerGraph, ThrillerNode,
-    ThrillerNodeInner,
+    AllocateEdge, AllocateVar, AttachedEdge, GraphPass, ThrillerBlock, ThrillerEdge, ThrillerGraph,
+    ThrillerNode, ThrillerNodeInner,
 };
 pub use dtype::DataType;
 pub use engine::{BlockLayout, BlockShape, ThrillerEngine};
